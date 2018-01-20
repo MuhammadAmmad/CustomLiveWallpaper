@@ -14,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -121,6 +122,34 @@ public class HomeActivity extends AppCompatActivity implements ImageManageFragme
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d("__Debug", "onActivityResult");
+        if(resultCode != RESULT_OK) {
+            return;
+        }
+
+        Log.d("__Debug", "onActivityResult : requestCode = " + requestCode);
+        switch(requestCode) {
+            case Consts.WALLPAPER_CHANGED:
+                //onResultWallpaperChanged(data);
+                break;
+
+            case Consts.PICK_FROM_ALBUM:
+                imageManageFragment.onResultPickFromAlbum(data);
+                break;
+
+            case Consts.PICK_FROM_CAMERA:
+                //onResultPickFromCamera(data);
+                break;
+
+            case Consts.CROP_FROM_CAMERA:
+                //onResultCropFromCamera(data);
+                break;
+        }
     }
 
     @Override

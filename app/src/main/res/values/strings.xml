@@ -4,6 +4,7 @@
     <string name="btn_clear_selected_album">사진초기화</string>
     <string name="btn_start_service">배경화면 설정</string>
     <string name="label_selected_image">외 %1$d개 사진 선택</string>
+    <string name="label_empty_image">사진을 추가해 주세요</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="title_activity_home">라이브 배경화면 설정</string>

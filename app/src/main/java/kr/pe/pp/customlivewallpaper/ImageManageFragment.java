@@ -1,14 +1,27 @@
 package kr.pe.pp.customlivewallpaper;
 
+import android.content.ClipData;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.GridView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 public class ImageManageFragment extends Fragment {
     private ImageManageFragmentListener mListener;
@@ -39,7 +52,49 @@ public class ImageManageFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        Log.d("__Debug__", "ImageManageFragment::onCreateView");
         return inflater.inflate(R.layout.fragment_image_manage, container, false);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        Log.d("__Debug__", "ImageManageFragment::onActivityCreated");
+
+        GridView gridView = (GridView)getView().findViewById(R.id.gridImageList);
+        CustomImageGridAdapter adapter = new CustomImageGridAdapter(getActivity().getApplicationContext(), _ImagePathList);
+        gridView.setAdapter(adapter);
+
+        LoadSettings();
+
+        getView().findViewById(R.id.buttonAdd).setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d("__Debug", "buttonAdd.onClick");
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                intent.setAction(Intent.ACTION_PICK);
+                getActivity().startActivityForResult(Intent.createChooser(intent,"Select Picture"), Consts.PICK_FROM_ALBUM);
+            }
+        });
+
+        getView().findViewById(R.id.buttonDelete).setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+        getView().findViewById(R.id.buttonClear).setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                _ImagePathList.clear();
+                SaveSettings();
+                RefreshControls();
+            }
+        });
     }
 
     public void onButtonPressed(Uri uri) {
@@ -71,13 +126,67 @@ public class ImageManageFragment extends Fragment {
         _ImagePathList = list;
     }
 
-    public void onButtonAddClick(View view) {
+    private void LoadSettings() {
+        // load uri list
+        _ImagePathList.clear();
+        SharedPreferences pref = getActivity().getSharedPreferences("ImagePathList", getActivity().MODE_PRIVATE);
+        Collection<?> col =  pref.getAll().values();
+        Iterator<?> it = col.iterator();
+        while(it.hasNext())
+        {
+            String imagePath = (String)it.next();
+            _ImagePathList.add(imagePath);
+            Log.d("__Debug__", "Load - " + imagePath);
+        }
+
+        // refresh image grid
+        RefreshControls();
     }
 
-    public void onButtonRemoveClick(View view) {
+    private void SaveSettings() {
+        // refresh image grid
+        RefreshControls();
+
+        // save uri list
+        SharedPreferences pref = getActivity().getSharedPreferences("ImagePathList", getActivity().MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        for(int i=0; i<_ImagePathList.size(); i++) {
+            editor.putString(Integer.toString(i), _ImagePathList.get(i));
+            Log.d("__Debug__", "Save - " + Integer.toString(i) + ":" + _ImagePathList.get(i));
+        }
+        editor.commit();
     }
 
-    public void onButtonClearClick(View view) {
+    private void RefreshControls() {
+        GridView gridView = (GridView)getView().findViewById(R.id.gridImageList);
+        gridView.invalidateViews();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+    public void onResultPickFromAlbum(Intent data) {
+        Log.d("__Debug__", "onResultPickFromAlbum");
+        if(data.getClipData() != null) {
+            ClipData clip = data.getClipData();
+            for(int i=0; i<clip.getItemCount(); i++) {
+                ClipData.Item item = clip.getItemAt(i);
+                addImagePathToList(item.getUri());
+            }
+        } else if(data.getData() != null) {
+            addImagePathToList(data.getData());
+        }
+
+        SaveSettings();
+    }
+    private void addImagePathToList(Uri uri) {
+        String path = uri.getPath();
+        String realPath = RealPathUtil.getRealPath(getActivity().getApplicationContext(), uri);
+        Log.d("__Debug__", "Path : " + path);
+        Log.d("__Debug__", "Real Path : " + realPath);
+        if(!_ImagePathList.contains(realPath)) {
+            Log.d("__Debug__", "Add Real Path : " + realPath);
+            _ImagePathList.add(realPath);
+        }
     }
 
 }

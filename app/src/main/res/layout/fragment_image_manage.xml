@@ -23,11 +23,23 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <GridView
-                android:id="@+id/gridImageList"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_weight="1" />
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginBottom="0dp"
+                android:orientation="vertical">
+
+                <GridView
+                    android:id="@+id/gridImageList"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:numColumns="@integer/grid_columns"
+                    android:verticalSpacing="10dp"
+                    android:horizontalSpacing="10dp">
+                </GridView>
+
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -41,7 +53,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:onClick="onButtonAddClick"
                     android:text="추가" />
 
                 <Button
@@ -50,7 +61,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:onClick="onButtonRemoveClick"
                     android:text="제거" />
 
                 <Button
@@ -59,7 +69,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:onClick="onButtonClearClick"
                     android:text="초기화" />
             </LinearLayout>
 
