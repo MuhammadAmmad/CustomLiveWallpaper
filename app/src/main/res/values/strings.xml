@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">라이브 배경화면 설정</string>
+    <string name="btn_select_album">사진추가</string>
+    <string name="btn_clear_selected_album">사진초기화</string>
+    <string name="btn_start_service">배경화면 설정</string>
+    <string name="label_selected_image">외 %1$d개 사진 선택</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="title_activity_home">라이브 배경화면 설정</string>
+    <string name="title_image_manage">이미지 관리</string>
+    <string name="title_effect">효과</string>
+    <string name="title_preview">미리보기</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
