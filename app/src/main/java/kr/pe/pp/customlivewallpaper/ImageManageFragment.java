@@ -11,15 +11,20 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -62,9 +67,20 @@ public class ImageManageFragment extends Fragment {
 
         Log.d("__Debug__", "ImageManageFragment::onActivityCreated");
 
-        GridView gridView = (GridView)getView().findViewById(R.id.gridImageList);
+        final GridView gridView = (GridView)getView().findViewById(R.id.gridImageList);
+        gridView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
         CustomImageGridAdapter adapter = new CustomImageGridAdapter(getActivity().getApplicationContext(), _ImagePathList);
         gridView.setAdapter(adapter);
+        gridView.setOnItemClickListener(new GridView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                CustomImageItemView itemView = (CustomImageItemView)view;
+                itemView.toggle();
+                gridView.setItemChecked(position, itemView.isChecked());
+
+                Log.d("__Debug__", "Set Item Checked : " + position + "(" + itemView.isChecked() + ") - " + gridView.getCheckedItemPositions().size());
+            }
+        });
 
         LoadSettings();
 
@@ -83,7 +99,19 @@ public class ImageManageFragment extends Fragment {
         getView().findViewById(R.id.buttonDelete).setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                SparseBooleanArray positions = gridView.getCheckedItemPositions();
+                Log.d("__Debug__", "Remove Count : " + positions.size());
+                if(positions.size() > 0) {
+                    for(int i = gridView.getCount()-1; i >= 0; i--) {
+                        if(positions.get(i)) {
+                            Log.d("__Debug__", "Remove Index : " + i);
+                            _ImagePathList.remove(i);
+                            gridView.setItemChecked(i, false);
+                        }
+                    }
+                }
+                SaveSettings();
+                RefreshControls();
             }
         });
 
