@@ -3,6 +3,8 @@ package kr.pe.pp.customlivewallpaper;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.app.WallpaperManager;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -39,8 +41,13 @@ public class HomeActivity extends AppCompatActivity implements ImageManageFragme
                 case R.id.navigation_effect:
                     getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, effectFragment).commit();
                     return true;
-                case R.id.navigation_preview:
+                case R.id.navigation_preview: {
+                    Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
+                    intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+                            new ComponentName(getBaseContext(), LiveWallpaperService.class));
+                    startActivityForResult(intent, Consts.WALLPAPER_CHANGED);
                     return true;
+                }
             }
             return false;
         }

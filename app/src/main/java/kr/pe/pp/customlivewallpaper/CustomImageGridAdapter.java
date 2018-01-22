@@ -3,6 +3,8 @@ package kr.pe.pp.customlivewallpaper;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,6 +46,7 @@ public class CustomImageGridAdapter extends BaseAdapter {
         return i;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         String filePath = _ImagePathList.get(i);
@@ -57,7 +60,7 @@ public class CustomImageGridAdapter extends BaseAdapter {
         if(_Bitmaps.containsKey(filePath)) {
             bmp = _Bitmaps.get(filePath);
         } else {
-            bmp = BitmapFactory.decodeFile(filePath);
+            bmp = Util.createBitmapFromPath(filePath, gridView.getColumnWidth(), 160);
             _Bitmaps.put(filePath, bmp);
         }
         ((CustomImageItemView)view).setImage(bmp);

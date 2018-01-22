@@ -27,10 +27,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class ImageManageFragment extends Fragment {
     private ImageManageFragmentListener mListener;
-    private ArrayList<String> _ImagePathList = new ArrayList<>();
 
     private static final int PICK_FROM_ALBUM = 101;
 
@@ -69,7 +70,7 @@ public class ImageManageFragment extends Fragment {
 
         final GridView gridView = (GridView)getView().findViewById(R.id.gridImageList);
         gridView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
-        CustomImageGridAdapter adapter = new CustomImageGridAdapter(getActivity().getApplicationContext(), _ImagePathList);
+        CustomImageGridAdapter adapter = new CustomImageGridAdapter(getActivity().getApplicationContext(), ApplicationData.getImagePathList());
         gridView.setAdapter(adapter);
         gridView.setOnItemClickListener(new GridView.OnItemClickListener() {
             @Override
@@ -105,7 +106,7 @@ public class ImageManageFragment extends Fragment {
                     for(int i = gridView.getCount()-1; i >= 0; i--) {
                         if(positions.get(i)) {
                             Log.d("__Debug__", "Remove Index : " + i);
-                            _ImagePathList.remove(i);
+                            ApplicationData.getImagePathList().remove(i);
                             gridView.setItemChecked(i, false);
                         }
                     }
@@ -118,7 +119,7 @@ public class ImageManageFragment extends Fragment {
         getView().findViewById(R.id.buttonClear).setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-                _ImagePathList.clear();
+                ApplicationData.getImagePathList().clear();
                 SaveSettings();
                 RefreshControls();
             }
@@ -147,25 +148,9 @@ public class ImageManageFragment extends Fragment {
         mListener = null;
     }
 
-    public ArrayList<String> getImageList() {
-        return _ImagePathList;
-    }
-    public void setImageList(ArrayList<String> list) {
-        _ImagePathList = list;
-    }
-
     private void LoadSettings() {
         // load uri list
-        _ImagePathList.clear();
-        SharedPreferences pref = getActivity().getSharedPreferences("ImagePathList", getActivity().MODE_PRIVATE);
-        Collection<?> col =  pref.getAll().values();
-        Iterator<?> it = col.iterator();
-        while(it.hasNext())
-        {
-            String imagePath = (String)it.next();
-            _ImagePathList.add(imagePath);
-            Log.d("__Debug__", "Load - " + imagePath);
-        }
+        ApplicationData.Load(getContext());
 
         // refresh image grid
         RefreshControls();
@@ -176,14 +161,7 @@ public class ImageManageFragment extends Fragment {
         RefreshControls();
 
         // save uri list
-        SharedPreferences pref = getActivity().getSharedPreferences("ImagePathList", getActivity().MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
-        editor.clear();
-        for(int i=0; i<_ImagePathList.size(); i++) {
-            editor.putString(Integer.toString(i), _ImagePathList.get(i));
-            Log.d("__Debug__", "Save - " + Integer.toString(i) + ":" + _ImagePathList.get(i));
-        }
-        editor.commit();
+        ApplicationData.Save(getContext());
     }
 
     private void RefreshControls() {
@@ -211,9 +189,9 @@ public class ImageManageFragment extends Fragment {
         String realPath = RealPathUtil.getRealPath(getActivity().getApplicationContext(), uri);
         Log.d("__Debug__", "Path : " + path);
         Log.d("__Debug__", "Real Path : " + realPath);
-        if(!_ImagePathList.contains(realPath)) {
+        if(!ApplicationData.getImagePathList().contains(realPath)) {
             Log.d("__Debug__", "Add Real Path : " + realPath);
-            _ImagePathList.add(realPath);
+            ApplicationData.getImagePathList().add(realPath);
         }
     }
 

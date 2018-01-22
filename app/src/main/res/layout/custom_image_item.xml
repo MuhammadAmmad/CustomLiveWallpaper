@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="160dp"
     android:layout_gravity="center"
@@ -22,14 +23,14 @@
         android:id="@+id/imageViewCheckbox"
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:layout_gravity="top|left"
+        android:layout_gravity="center"
         android:layout_marginBottom="4dp"
         android:layout_marginEnd="4dp"
         android:layout_marginStart="4dp"
         android:layout_marginTop="4dp"
         android:background="@drawable/ic_check_black_100dp"
-        android:backgroundTint="@color/colorAccent"
+        android:backgroundTint="#aacc00"
         android:scaleType="fitXY"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
 </FrameLayout>
