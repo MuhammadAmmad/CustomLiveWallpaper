@@ -43,14 +43,14 @@ public class LiveWallpaperService extends WallpaperService {
         private final Thread animationThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                long idleSleepTick = 1000 / 1;
+                long idleSleepTick = 1000 / 10;
                 long runningSleepTick = 1000 / 60;
 
                 while(running) {
                     try {
                         if(visible) {
                             long before = System.currentTimeMillis();
-                            handler.post(drawRunner);
+                            drawRunner.run();
                             long runningTime = System.currentTimeMillis() - before;
 
                             if(runningSleepTick - runningTime > 0) {
@@ -59,7 +59,6 @@ public class LiveWallpaperService extends WallpaperService {
                             //Log.d("LiveWallpaperService", "Running... " + (runningSleepTick - runningTime));
                         } else {
                             Thread.sleep(idleSleepTick);
-                            Log.d("LiveWallpaperService", "idle...");
                         }
                     } catch (Exception e) {
                         Log.e("LiveWallpaperService", "Exception in thread : ", e);
@@ -101,10 +100,11 @@ public class LiveWallpaperService extends WallpaperService {
             this.visible = visible;
             if (visible) {
                 drawer.active();
-                handler.post(drawRunner);
+                drawRunner.run();
+                //handler.post(drawRunner);
             } else {
                 drawer.deactive();
-                handler.removeCallbacks(drawRunner);
+                //handler.removeCallbacks(drawRunner);
             }
             super.onVisibilityChanged(visible);
         }
