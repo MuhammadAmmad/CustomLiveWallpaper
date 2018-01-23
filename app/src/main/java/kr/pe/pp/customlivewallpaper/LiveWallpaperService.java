@@ -2,6 +2,7 @@ package kr.pe.pp.customlivewallpaper;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.os.Handler;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
 import android.view.Display;
@@ -16,20 +17,7 @@ import java.util.ArrayList;
 
 public class LiveWallpaperService extends WallpaperService {
 
-    ArrayList<Bitmap> bitmaps = new ArrayList<>();
-    Util.Size screenSize = null;
-
-    private void LoadBitmaps() {
-        screenSize = Util.getScreenSize(getApplicationContext());
-        Log.d("__Debug__", "LiveWallpaperService::LoadBitmaps-ScreenSize(" + screenSize.getWidth() + ", " + screenSize.getHeight() + ")");
-
-        ApplicationData.Load(getApplicationContext());
-        for(String path : ApplicationData.getImagePathList()) {
-            Bitmap bmp = Util.createBitmapFromPath(path, screenSize.getWidth(), screenSize.getHeight());
-            bmp = Util.resizeBitmapWithMargin(bmp, screenSize.getWidth(), screenSize.getHeight(), Util.ResizeMode.RESIZE_FIT_IMAGE, 50, Util.CropMode.CROP_CENTER);
-            bitmaps.add(bmp);
-        }
-    }
+    private IDrawer drawer = new LiveWallpaperDrawer();
 
     @Override
     public Engine onCreateEngine() {
@@ -37,28 +25,89 @@ public class LiveWallpaperService extends WallpaperService {
     }
 
     private class LiveWallpaperEngine extends Engine {
+        private boolean visible = false;
+        private boolean running = true;
+        private final Handler handler = new Handler();
+        private final Runnable drawRunner = new Runnable() {
+            @Override
+            public void run() {
+                SurfaceHolder holder = getSurfaceHolder();
+
+                Canvas canvas = holder.lockCanvas();
+
+                drawer.draw(canvas);
+
+                holder.unlockCanvasAndPost(canvas);
+            }
+        };
+        private final Thread animationThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                long idleSleepTick = 1000 / 1;
+                long runningSleepTick = 1000 / 60;
+
+                while(running) {
+                    try {
+                        if(visible) {
+                            long before = System.currentTimeMillis();
+                            handler.post(drawRunner);
+                            long runningTime = System.currentTimeMillis() - before;
+
+                            if(runningSleepTick - runningTime > 0) {
+                                Thread.sleep(runningSleepTick - runningTime);
+                            }
+                            //Log.d("LiveWallpaperService", "Running... " + (runningSleepTick - runningTime));
+                        } else {
+                            Thread.sleep(idleSleepTick);
+                            Log.d("LiveWallpaperService", "idle...");
+                        }
+                    } catch (Exception e) {
+                        Log.e("LiveWallpaperService", "Exception in thread : ", e);
+                    }
+                }
+            }
+        });
+
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
-            LoadBitmaps();
-            Log.d("__Debug__", "LiveWallpaperEngine::onCreate");
+            drawer.init(getApplicationContext());
+            running = true;
+            animationThread.start();
+            Log.d("LiveWallpaperService", "LiveWallpaperEngine::onCreate");
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            running = false;
+            Log.d("LiveWallpaperService", "LiveWallpaperEngine::onDestroy");
+        }
+
+        @Override
+        public void onSurfaceCreated(SurfaceHolder holder) {
+            super.onSurfaceCreated(holder);
+            Log.d("LiveWallpaperService", "LiveWallpaperEngine::onSurfaceCreated");
+        }
+
+        @Override
+        public void onSurfaceDestroyed(SurfaceHolder holder) {
+            super.onSurfaceDestroyed(holder);
+            Log.d("LiveWallpaperService", "LiveWallpaperEngine::onSurfaceDestroyed");
         }
 
         @Override
         public void onVisibilityChanged(boolean visible) {
-            super.onVisibilityChanged(visible);
-
-            SurfaceHolder holder = getSurfaceHolder();
-
-            Canvas canvas = holder.lockCanvas();
-
-            if(bitmaps.size() > 0) {
-                Bitmap bmp = bitmaps.get(0);
-
-                canvas.drawBitmap(bitmaps.get(0), (screenSize.getWidth() - bmp.getWidth()) / 2, (screenSize.getHeight() - bmp.getHeight()) / 2, null);
+            this.visible = visible;
+            if (visible) {
+                drawer.active();
+                handler.post(drawRunner);
+            } else {
+                drawer.deactive();
+                handler.removeCallbacks(drawRunner);
             }
-
-            holder.unlockCanvasAndPost(canvas);
+            super.onVisibilityChanged(visible);
         }
     }
+
 }
