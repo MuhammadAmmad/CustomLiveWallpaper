@@ -36,7 +36,7 @@ public class LiveWallpaperDrawer implements IDrawer {
     double basePitch = 0, baseRoll = 0;
 
     public LiveWallpaperDrawer() {
-        backgroundSwitcher = new BackgroundSwitcher(BackgroundSwitcher.SwitchMode.SWITCH_RANDOM);
+        backgroundSwitcher = new BackgroundSwitcher(BackgroundSwitcher.SwitchMode.SWITCH_SLIDE_OVERLAY);
         particleDrawer = new ParticleDrawer();
     }
 

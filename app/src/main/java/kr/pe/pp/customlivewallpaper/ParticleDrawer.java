@@ -48,7 +48,9 @@ public class ParticleDrawer {
     public void init(Context context) {
         this.context = context;
 
-        Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.particle_star);
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 2;
+        Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.particle_snow, options);
         int size = bmp.getHeight();
         int count = (int)(bmp.getWidth() / size);
         for(int i=0; i<count; i++) {
@@ -64,7 +66,7 @@ public class ParticleDrawer {
     public void active() {
         timerTaskGenerator = new GenerateTimerTask();
         timerGenerator = new Timer();
-        timerGenerator.schedule(timerTaskGenerator, 0, 700);
+        timerGenerator.schedule(timerTaskGenerator, 0, 300);
     }
 
     public void deactive() {

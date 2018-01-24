@@ -23,9 +23,14 @@ public class Particle {
     private Bitmap bitmapParticle = null;
     private Util.Size screenSize = null;
 
+    private int particleSpeed = 4;
+    private int particleRotateSpeed = 5;
+
     private int particleAngle = 0;
     private int particleX = 0;
     private int particleY = 0;
+    private float particleScale = 1.0f;
+    private float particleRotateCenter = 0.0f;
     private Paint particlePaint = null;
     private Matrix particleMatrix = null;
     private boolean isFinish = false;
@@ -39,6 +44,10 @@ public class Particle {
         this.bitmapParticle = bitmapParticle;
         this.screenSize = Util.getScreenSize(context);
 
+        particleScale = (float)((Math.random() * 60) + 20) / 100.0f;
+        particleRotateCenter = 2 / particleScale;
+        particleSpeed = (int)(particleScale * 8);           // speed 2 ~ 7
+        particleRotateSpeed = (int)(Math.random() * 6) + 2;    // rotate speed 2 ~ 7
         particleX = (int)(Math.random() * screenSize.getWidth());
         particleY = bitmapParticle.getHeight() * -1;
         particlePaint = new Paint();
@@ -57,15 +66,17 @@ public class Particle {
     public void draw(Canvas canvas) {
         if(bitmapParticle == null || isFinish) return;
 
-        particleAngle += 5;
-        if(particleAngle >= 360) {
-            particleAngle = 0;
-        }
-        Log.d("__Debug__", "particleAngle : " + particleAngle);
-        particleMatrix.postRotate(1.0f / (float)particleAngle, bitmapParticle.getWidth() / 2, bitmapParticle.getHeight() / 2);
+        particleMatrix.reset();
 
-        particleY += 2;
-        particleMatrix.setTranslate(particleX, particleY);
+        particleAngle += particleRotateSpeed;
+        if(particleAngle >= 360) {
+            particleAngle -= 360;
+        }
+        //Log.d("__Debug__", "particleAngle : " + particleAngle);
+        particleMatrix.postRotate(particleAngle, bitmapParticle.getWidth() / particleRotateCenter, bitmapParticle.getHeight() / particleRotateCenter);
+
+        particleY += particleSpeed;
+        particleMatrix.postTranslate(particleX, particleY);
         if(particleY >= screenSize.getHeight() + bitmapParticle.getHeight()) {
             isFinish = true;
             if(particleEventListener != null) {
@@ -73,6 +84,9 @@ public class Particle {
             }
         }
 
-        canvas.drawBitmap(bitmapParticle, particleMatrix, particlePaint);
+        particleMatrix.preScale(particleScale, particleScale);
+        //particleMatrix.postScale(0.5f, 0.5f);
+
+        canvas.drawBitmap(bitmapParticle, particleMatrix, null);
     }
 }
