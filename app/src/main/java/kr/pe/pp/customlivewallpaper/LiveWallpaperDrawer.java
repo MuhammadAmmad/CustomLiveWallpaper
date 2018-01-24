@@ -1,10 +1,13 @@
 package kr.pe.pp.customlivewallpaper;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -26,6 +29,7 @@ public class LiveWallpaperDrawer implements IDrawer {
 
     Context context = null;
     BackgroundSwitcher backgroundSwitcher = null;
+    ParticleDrawer particleDrawer = null;
 
     boolean isGetBaseAngle = false;
     AngleSensor angleSensor = null;
@@ -33,6 +37,7 @@ public class LiveWallpaperDrawer implements IDrawer {
 
     public LiveWallpaperDrawer() {
         backgroundSwitcher = new BackgroundSwitcher(BackgroundSwitcher.SwitchMode.SWITCH_RANDOM);
+        particleDrawer = new ParticleDrawer();
     }
 
     @Override
@@ -41,16 +46,19 @@ public class LiveWallpaperDrawer implements IDrawer {
 
         backgroundSwitcher.init(context);
         angleSensor = new AngleSensor(context);
+        particleDrawer.init(context);
     }
 
     @Override
     public void destroy() {
         backgroundSwitcher.destroy();
+        particleDrawer.destroy();
     }
 
     @Override
     public void active() {
         backgroundSwitcher.active();
+        particleDrawer.active();
 
         angleSensor.register();
         (new Handler()).postDelayed(new Runnable() {
@@ -68,6 +76,7 @@ public class LiveWallpaperDrawer implements IDrawer {
         isGetBaseAngle = false;
         angleSensor.unregister();
 
+        particleDrawer.deactive();
         backgroundSwitcher.deactive();
     }
 
@@ -86,6 +95,7 @@ public class LiveWallpaperDrawer implements IDrawer {
             offsetY = (int) (((float) BackgroundSwitcher.margin / (float) 90) * diffRoll);
         }
         backgroundSwitcher.draw(canvas, offsetX, offsetY);
+        particleDrawer.draw(canvas);
 
         Paint paint = new Paint();
         paint.setAntiAlias(true);

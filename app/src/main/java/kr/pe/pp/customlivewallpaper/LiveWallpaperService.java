@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
+import android.view.animation.Animation;
 
 import java.util.ArrayList;
 
@@ -26,7 +27,6 @@ public class LiveWallpaperService extends WallpaperService {
 
     private class LiveWallpaperEngine extends Engine {
         private boolean visible = false;
-        private boolean running = true;
         private final Handler handler = new Handler();
         private final Runnable drawRunner = new Runnable() {
             @Override
@@ -40,13 +40,16 @@ public class LiveWallpaperService extends WallpaperService {
                 holder.unlockCanvasAndPost(canvas);
             }
         };
-        private final Thread animationThread = new Thread(new Runnable() {
+
+        private class AnimationRunnable implements Runnable {
+            public boolean running = false;
+
             @Override
             public void run() {
                 long idleSleepTick = 1000 / 10;
                 long runningSleepTick = 1000 / 60;
 
-                while(running) {
+                while(this.running) {
                     try {
                         if(visible) {
                             long before = System.currentTimeMillis();
@@ -56,7 +59,6 @@ public class LiveWallpaperService extends WallpaperService {
                             if(runningSleepTick - runningTime > 0) {
                                 Thread.sleep(runningSleepTick - runningTime);
                             }
-                            //Log.d("LiveWallpaperService", "Running... " + (runningSleepTick - runningTime));
                         } else {
                             Thread.sleep(idleSleepTick);
                         }
@@ -65,21 +67,20 @@ public class LiveWallpaperService extends WallpaperService {
                     }
                 }
             }
-        });
+        }
+        private AnimationRunnable animationLoop = null;
+        private Thread animationThread = null;
 
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
             drawer.init(getApplicationContext());
-            running = true;
-            animationThread.start();
             Log.d("LiveWallpaperService", "LiveWallpaperEngine::onCreate");
         }
 
         @Override
         public void onDestroy() {
             super.onDestroy();
-            running = false;
             Log.d("LiveWallpaperService", "LiveWallpaperEngine::onDestroy");
         }
 
@@ -101,13 +102,17 @@ public class LiveWallpaperService extends WallpaperService {
             if (visible) {
                 drawer.active();
                 drawRunner.run();
-                //handler.post(drawRunner);
+                animationLoop = new AnimationRunnable();
+                animationLoop.running = true;
+                animationThread = new Thread(animationLoop);
+                animationThread.start();
             } else {
+                animationLoop.running = false;
                 drawer.deactive();
-                //handler.removeCallbacks(drawRunner);
             }
             super.onVisibilityChanged(visible);
         }
     }
+
 
 }
