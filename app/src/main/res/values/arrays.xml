@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="effect_name">
+        <item>별</item>
+        <item>눈</item>
+        <item>비눗방울</item>
+        <item>꽃</item>
+        <item>효과 이미지 선택</item>
+    </string-array>
+    <string-array name="effect_value">
+        <item>particle_star</item>
+        <item>particle_snow</item>
+        <item>particle_bubble</item>
+        <item>particle_flower</item>
+        <item>customize</item>
+    </string-array>
+</resources>

@@ -4,7 +4,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,7 +33,7 @@ public class ParticleDrawer {
             });
 
             if(bitmapParticles.size() > 0) {
-                particle.init(context, bitmapParticles.get((int)(Math.random() * bitmapParticles.size())));
+                particle.init(context, bitmapParticles.get((int)(Math.random() * bitmapParticles.size())), true);
                 addQueue.add(particle);
             }
         }
@@ -49,15 +51,21 @@ public class ParticleDrawer {
         this.context = context;
 
         final BitmapFactory.Options options = new BitmapFactory.Options();
+        //final int particleResourceId = Util.getResourceId("particle_snow", Drawable.class);
         options.inSampleSize = 2;
         Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.particle_snow, options);
         int size = bmp.getHeight();
         int count = (int)(bmp.getWidth() / size);
-        for(int i=0; i<count; i++) {
-            Bitmap tmp = Bitmap.createBitmap(bmp, i*size, 0, size, size);
-            bitmapParticles.add(tmp);
+        Log.d("__Debug__", "Particle Count : " + count + ", " + bmp.getWidth() + " / " + size);
+        if(count == 1) {
+            bitmapParticles.add(bmp);
+        } else {
+            for (int i = 0; i < count; i++) {
+                Bitmap tmp = Bitmap.createBitmap(bmp, i * size, 0, size, size);
+                bitmapParticles.add(tmp);
+            }
+            bmp.recycle();
         }
-        bmp.recycle();
     }
 
     public void destroy() {
@@ -73,9 +81,9 @@ public class ParticleDrawer {
         timerGenerator.cancel();
     }
 
-    public void draw(Canvas canvas) {
+    public void draw(Canvas canvas, int offsetX, int offsetY) {
         for(Particle particle : particles) {
-            particle.draw(canvas);
+            particle.draw(canvas, offsetX, offsetY);
         }
 
         Particle particle = removeQueue.poll();

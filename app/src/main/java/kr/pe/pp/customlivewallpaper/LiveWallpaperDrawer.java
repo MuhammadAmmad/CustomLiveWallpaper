@@ -95,7 +95,7 @@ public class LiveWallpaperDrawer implements IDrawer {
             offsetY = (int) (((float) BackgroundSwitcher.margin / (float) 90) * diffRoll);
         }
         backgroundSwitcher.draw(canvas, offsetX, offsetY);
-        particleDrawer.draw(canvas);
+        particleDrawer.draw(canvas, offsetX, offsetY);
 
         Paint paint = new Paint();
         paint.setAntiAlias(true);

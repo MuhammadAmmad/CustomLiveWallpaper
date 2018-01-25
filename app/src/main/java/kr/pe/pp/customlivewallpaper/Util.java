@@ -7,6 +7,8 @@ import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
+import java.lang.reflect.Field;
+
 /**
  * Created by Administrator on 2018-01-22.
  */
@@ -223,5 +225,15 @@ public class Util {
         }
         Log.d("__Debug__", "Crop(" + cropX + ", " + cropY + ", " + cropWidth + ", " + cropHeight + ")");
         return Bitmap.createBitmap(src, cropX, cropY, cropWidth, cropHeight);
+    }
+
+    public static int getResourceId(String resourceName, Class<?> c) {
+        try {
+            Field idField = c.getDeclaredField(resourceName);
+            return idField.getInt(idField);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
     }
 }

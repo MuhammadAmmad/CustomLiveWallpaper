@@ -23,6 +23,8 @@ public class Particle {
     private Bitmap bitmapParticle = null;
     private Util.Size screenSize = null;
 
+    private boolean isRotate = true;
+
     private int particleSpeed = 4;
     private int particleRotateSpeed = 5;
 
@@ -39,10 +41,11 @@ public class Particle {
         particleEventListener = listener;
     }
 
-    public void init(Context context, Bitmap bitmapParticle) {
+    public void init(Context context, Bitmap bitmapParticle, boolean isRotate) {
         this.context = context;
         this.bitmapParticle = bitmapParticle;
         this.screenSize = Util.getScreenSize(context);
+        this.isRotate = isRotate;
 
         particleScale = (float)((Math.random() * 60) + 20) / 100.0f;
         particleRotateCenter = 2 / particleScale;
@@ -63,20 +66,23 @@ public class Particle {
     public void deactive() {
     }
 
-    public void draw(Canvas canvas) {
+    public void draw(Canvas canvas, int offsetX, int offsetY) {
         if(bitmapParticle == null || isFinish) return;
 
         particleMatrix.reset();
 
-        particleAngle += particleRotateSpeed;
-        if(particleAngle >= 360) {
-            particleAngle -= 360;
+        // rotate
+        if(isRotate) {
+            particleAngle += particleRotateSpeed;
+            if (particleAngle >= 360) {
+                particleAngle -= 360;
+            }
+            particleMatrix.postRotate(particleAngle, bitmapParticle.getWidth() / particleRotateCenter, bitmapParticle.getHeight() / particleRotateCenter);
         }
-        //Log.d("__Debug__", "particleAngle : " + particleAngle);
-        particleMatrix.postRotate(particleAngle, bitmapParticle.getWidth() / particleRotateCenter, bitmapParticle.getHeight() / particleRotateCenter);
 
+        // translate
         particleY += particleSpeed;
-        particleMatrix.postTranslate(particleX, particleY);
+        particleMatrix.postTranslate(particleX - (offsetX * (0.8f - particleScale)), particleY - (offsetY * (0.8f - particleScale)));
         if(particleY >= screenSize.getHeight() + bitmapParticle.getHeight()) {
             isFinish = true;
             if(particleEventListener != null) {
@@ -84,8 +90,8 @@ public class Particle {
             }
         }
 
+        // scale
         particleMatrix.preScale(particleScale, particleScale);
-        //particleMatrix.postScale(0.5f, 0.5f);
 
         canvas.drawBitmap(bitmapParticle, particleMatrix, null);
     }
