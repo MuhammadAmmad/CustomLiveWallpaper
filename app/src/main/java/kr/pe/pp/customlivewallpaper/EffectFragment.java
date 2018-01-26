@@ -21,14 +21,6 @@ import android.widget.Spinner;
 import android.widget.Switch;
 
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link EffectFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link EffectFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class EffectFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
@@ -44,25 +36,16 @@ public class EffectFragment extends Fragment {
     private RadioButton radioMoveToLeftBottom = null;
     private RadioButton radioMoveToBottom = null;
     private RadioButton radioMoveToRightBottom = null;
-    private RadioButton radioMoveToRight = null;
-    private RadioButton radioMoveToRightTop = null;
-    private RadioButton radioMoveToTop = null;
-    private RadioButton radioMoveToLeftTop = null;
-    private RadioButton radioMoveToLeft = null;
     private SeekBar seekBarMoveSpeed = null;
     private SeekBar seekBarMoveVibrate = null;
     private SeekBar seekBarSize = null;
     private SeekBar seekBarSizeVibrate = null;
 
+    private String[] slideValues = null;
+    private String[] effectValues = null;
+
     public EffectFragment() {
         // Required empty public constructor
-    }
-
-    public static EffectFragment newInstance(String param1, String param2) {
-        EffectFragment fragment = new EffectFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
     }
 
     @Override
@@ -91,12 +74,25 @@ public class EffectFragment extends Fragment {
 
     private void ApplicationDataToViews() {
         checkBoxSlideImage.setChecked(ApplicationData.getIsEnableSlide());
-        //spinnerSlideType.;
+
+        for(int i=0; i<slideValues.length; i++) {
+            if(slideValues[i] == ApplicationData.getSlideType()) {
+                spinnerSlideType.setSelection(i);
+                break;
+            }
+        }
+
         seekBarSlideSpeed.setMax(10);
         seekBarSlideSpeed.setProgress(ApplicationData.getSlideSpeed());
 
         checkBoxEffect.setChecked(ApplicationData.getIsEnableEffect());
-        //spinnerEffectType;
+
+        for(int i=0; i<effectValues.length; i++) {
+            if(effectValues[i] == ApplicationData.getEffectParticleType()) {
+                spinnerEffectType.setSelection(i);
+            }
+        }
+
         switchUseRotate.setChecked(ApplicationData.getEffectIsUseRotate());
         if(ApplicationData.getEffectIsRotateRight()) {
             radioRotateRight.setChecked(true);
@@ -106,29 +102,14 @@ public class EffectFragment extends Fragment {
         seekBarRotateSpeed .setMax(10);
         seekBarRotateSpeed .setProgress(ApplicationData.getEffectRotateSpeed());
         switch(ApplicationData.getEffectMoveDirection()) {
-            case UP:
-                radioMoveToTop.setChecked(true);
-                break;
             case DOWN:
                 radioMoveToBottom.setChecked(true);
-                break;
-            case LEFT:
-                radioMoveToLeft.setChecked(true);
-                break;
-            case RIGHT:
-                radioMoveToRight.setChecked(true);
                 break;
             case LEFT_DOWN:
                 radioMoveToLeftBottom.setChecked(true);
                 break;
-            case LEFT_UP:
-                radioMoveToLeftTop.setChecked(true);
-                break;
             case RIGHT_DOWN:
                 radioMoveToRightBottom.setChecked(true);
-                break;
-            case RIGHT_UP:
-                radioMoveToRightTop.setChecked(true);
                 break;
         }
         seekBarMoveSpeed.setMax(10);
@@ -143,11 +124,11 @@ public class EffectFragment extends Fragment {
 
     private void ApplicationDataFromViews() {
         ApplicationData.setIsEnableSlide(checkBoxSlideImage.isChecked());
-        //spinnerSlideType = (Spinner)getView().findViewById(R.id.spinnerSlideType);
+        ApplicationData.setSlideType(slideValues[spinnerSlideType.getSelectedItemPosition()]);
         ApplicationData.setSlideSpeed(seekBarSlideSpeed.getProgress());
 
         ApplicationData.setIsEnableEffect(checkBoxEffect.isChecked());
-        //spinnerEffectType = (Spinner)getView().findViewById(R.id.spinnerEffectType);
+        ApplicationData.setEffectParticleType(effectValues[spinnerEffectType.getSelectedItemPosition()]);
         ApplicationData.setEffectIsUseRotate(switchUseRotate.isChecked());
         if(radioRotateLeft.isChecked()) ApplicationData.setEffectIsRotateRight(false);
         else if(radioRotateRight.isChecked()) ApplicationData.setEffectIsRotateRight(true);
@@ -156,11 +137,6 @@ public class EffectFragment extends Fragment {
         if(radioMoveToLeftBottom.isChecked()) ApplicationData.setEffectMoveDirection(ApplicationData.MoveDirection.LEFT_DOWN);
         else if(radioMoveToBottom.isChecked()) ApplicationData.setEffectMoveDirection(ApplicationData.MoveDirection.DOWN);
         else if(radioMoveToRightBottom.isChecked()) ApplicationData.setEffectMoveDirection(ApplicationData.MoveDirection.RIGHT_DOWN);
-        else if(radioMoveToRight.isChecked()) ApplicationData.setEffectMoveDirection(ApplicationData.MoveDirection.RIGHT);
-        else if(radioMoveToRightTop.isChecked()) ApplicationData.setEffectMoveDirection(ApplicationData.MoveDirection.RIGHT_UP);
-        else if(radioMoveToTop.isChecked()) ApplicationData.setEffectMoveDirection(ApplicationData.MoveDirection.UP);
-        else if(radioMoveToLeftTop.isChecked()) ApplicationData.setEffectMoveDirection(ApplicationData.MoveDirection.LEFT_UP);
-        else if(radioMoveToLeft.isChecked()) ApplicationData.setEffectMoveDirection(ApplicationData.MoveDirection.LEFT);
 
         ApplicationData.setEffectMoveSpeed(seekBarMoveSpeed.getProgress());
         ApplicationData.setEffectMoveVibrate(seekBarMoveVibrate.getProgress());
@@ -171,6 +147,9 @@ public class EffectFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        slideValues = getResources().getStringArray(R.array.slide_value);
+        effectValues = getResources().getStringArray(R.array.effect_value);
 
         CheckBox.OnCheckedChangeListener disableCheckBoxChangeListener = new CheckBox.OnCheckedChangeListener() {
             @Override
@@ -218,72 +197,45 @@ public class EffectFragment extends Fragment {
         };
 
         checkBoxSlideImage = (CheckBox)getView().findViewById(R.id.checkBoxSlideImage);
-        checkBoxSlideImage.setOnCheckedChangeListener(disableCheckBoxChangeListener);
-        enableChildViews((ViewGroup)checkBoxSlideImage.getParent(), checkBoxSlideImage, checkBoxSlideImage.isChecked());
-
         spinnerSlideType = (Spinner)getView().findViewById(R.id.spinnerSlideType);
-        spinnerSlideType.setOnItemSelectedListener(spinnerChangedListener);
-
         seekBarSlideSpeed = (SeekBar)getView().findViewById(R.id.seekBarSlideSpeed);
-        seekBarSlideSpeed.setOnSeekBarChangeListener(seekBarChangedListener);
-
         checkBoxEffect = (CheckBox)getView().findViewById(R.id.checkBoxEffect);
-        checkBoxEffect.setOnCheckedChangeListener(disableCheckBoxChangeListener);
-        enableChildViews((ViewGroup)checkBoxEffect.getParent(), checkBoxEffect, checkBoxEffect.isChecked());
-
         spinnerEffectType = (Spinner)getView().findViewById(R.id.spinnerEffectType);
-        spinnerEffectType.setOnItemSelectedListener(spinnerChangedListener);
-
         switchUseRotate = (Switch)getView().findViewById(R.id.switchUseRotate);
-        switchUseRotate.setOnCheckedChangeListener(switchChangedListener);
-
         radioRotateLeft = (RadioButton)getView().findViewById(R.id.radioRotateLeft);
-        radioRotateLeft.setOnCheckedChangeListener(radioCheckedChangedListener);
-
         radioRotateRight = (RadioButton)getView().findViewById(R.id.radioRotateRight);
-        radioRotateRight.setOnCheckedChangeListener(radioCheckedChangedListener);
-
         seekBarRotateSpeed  = (SeekBar)getView().findViewById(R.id.seekBarRotateSpeed);
-        seekBarRotateSpeed.setOnSeekBarChangeListener(seekBarChangedListener);
-
         radioMoveToLeftBottom = (RadioButton)getView().findViewById(R.id.radioMoveToLeftBottom);
-        radioMoveToLeftBottom.setOnCheckedChangeListener(radioCheckedChangedListener);
-
         radioMoveToBottom = (RadioButton)getView().findViewById(R.id.radioMoveToBottom);
-        radioMoveToBottom.setOnCheckedChangeListener(radioCheckedChangedListener);
-
         radioMoveToRightBottom = (RadioButton)getView().findViewById(R.id.radioMoveToRightBottom);
-        radioMoveToRightBottom.setOnCheckedChangeListener(radioCheckedChangedListener);
-
-        radioMoveToRight = (RadioButton)getView().findViewById(R.id.radioMoveToRight);
-        radioMoveToRight.setOnCheckedChangeListener(radioCheckedChangedListener);
-
-        radioMoveToRightTop = (RadioButton)getView().findViewById(R.id.radioMoveToRightTop);
-        radioMoveToRightTop.setOnCheckedChangeListener(radioCheckedChangedListener);
-
-        radioMoveToTop = (RadioButton)getView().findViewById(R.id.radioMoveToTop);
-        radioMoveToTop.setOnCheckedChangeListener(radioCheckedChangedListener);
-
-        radioMoveToLeftTop = (RadioButton)getView().findViewById(R.id.radioMoveToLeftTop);
-        radioMoveToLeftTop.setOnCheckedChangeListener(radioCheckedChangedListener);
-
-        radioMoveToLeft = (RadioButton)getView().findViewById(R.id.radioMoveToLeft);
-        radioMoveToLeft.setOnCheckedChangeListener(radioCheckedChangedListener);
-
         seekBarMoveSpeed = (SeekBar)getView().findViewById(R.id.seekBarMoveSpeed);
-        seekBarMoveSpeed.setOnSeekBarChangeListener(seekBarChangedListener);
-
         seekBarMoveVibrate = (SeekBar)getView().findViewById(R.id.seekBarMoveVibrate);
-        seekBarMoveVibrate.setOnSeekBarChangeListener(seekBarChangedListener);
-
         seekBarSize = (SeekBar)getView().findViewById(R.id.seekBarSize);
-        seekBarSize.setOnSeekBarChangeListener(seekBarChangedListener);
-
         seekBarSizeVibrate = (SeekBar)getView().findViewById(R.id.seekBarSizeVibrate);
-        seekBarSizeVibrate.setOnSeekBarChangeListener(seekBarChangedListener);
 
         ApplicationData.LoadEffects(getContext());
         ApplicationDataToViews();
+
+        enableChildViews((ViewGroup)checkBoxSlideImage.getParent(), checkBoxSlideImage, checkBoxSlideImage.isChecked());
+        enableChildViews((ViewGroup)checkBoxEffect.getParent(), checkBoxEffect, checkBoxEffect.isChecked());
+
+        checkBoxSlideImage.setOnCheckedChangeListener(disableCheckBoxChangeListener);
+        spinnerSlideType.setOnItemSelectedListener(spinnerChangedListener);
+        seekBarSlideSpeed.setOnSeekBarChangeListener(seekBarChangedListener);
+        checkBoxEffect.setOnCheckedChangeListener(disableCheckBoxChangeListener);
+        spinnerEffectType.setOnItemSelectedListener(spinnerChangedListener);
+        switchUseRotate.setOnCheckedChangeListener(switchChangedListener);
+        radioRotateLeft.setOnCheckedChangeListener(radioCheckedChangedListener);
+        radioRotateRight.setOnCheckedChangeListener(radioCheckedChangedListener);
+        seekBarRotateSpeed.setOnSeekBarChangeListener(seekBarChangedListener);
+        radioMoveToLeftBottom.setOnCheckedChangeListener(radioCheckedChangedListener);
+        radioMoveToBottom.setOnCheckedChangeListener(radioCheckedChangedListener);
+        radioMoveToRightBottom.setOnCheckedChangeListener(radioCheckedChangedListener);
+        seekBarMoveSpeed.setOnSeekBarChangeListener(seekBarChangedListener);
+        seekBarMoveVibrate.setOnSeekBarChangeListener(seekBarChangedListener);
+        seekBarSize.setOnSeekBarChangeListener(seekBarChangedListener);
+        seekBarSizeVibrate.setOnSeekBarChangeListener(seekBarChangedListener);
+
     }
 
     public void onButtonPressed(Uri uri) {

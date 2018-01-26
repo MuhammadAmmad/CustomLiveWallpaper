@@ -43,7 +43,6 @@ public class BitmapHolder {
     public void init(Context context) {
         this.context = context;
         screenSize = Util.getScreenSize(context);
-        ApplicationData.Load(context);
 
         pathList.clear();
         for(String path : ApplicationData.getImagePathList()) { pathList.add(path); }

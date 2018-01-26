@@ -17,12 +17,7 @@ public class ApplicationData {
     public enum MoveDirection {
         LEFT_DOWN(0),
         DOWN(1),
-        RIGHT_DOWN(2),
-        RIGHT(3),
-        RIGHT_UP(4),
-        UP(5),
-        LEFT_UP(6),
-        LEFT(7);
+        RIGHT_DOWN(2);
 
         private final int value;
         private MoveDirection(int value) {
@@ -38,6 +33,7 @@ public class ApplicationData {
     private static boolean isEnableSlide = true;
     private static String slideType = "";
     private static int slideSpeed = 5;
+    private static int slideDelay = 5;
 
     private static boolean isEnableEffect = false;
     private static String effectParticleType = "";
@@ -85,6 +81,8 @@ public class ApplicationData {
     public static void setSlideType(String v) { slideType = v; }
     public static int getSlideSpeed() { return slideSpeed; }
     public static void setSlideSpeed(int v) { slideSpeed = v; }
+    public static int getSlideDelay() { return slideDelay; }
+    public static void setSlideDelay(int v) { slideDelay = v; }
 
     public static boolean getIsEnableEffect() { return isEnableEffect; }
     public static void setIsEnableEffect(boolean v) { isEnableEffect = v; }
@@ -113,6 +111,7 @@ public class ApplicationData {
         isEnableSlide = pref.getBoolean("isEnableSlide", true);
         slideType = pref.getString("slideType", "");;
         slideSpeed = pref.getInt("slideSpeed", 5);
+        slideDelay = pref.getInt("slideDelay", 5);
 
         isEnableEffect = pref.getBoolean("isEnableEffect", false);
         effectParticleType = pref.getString("effectParticleType", "");
@@ -127,13 +126,14 @@ public class ApplicationData {
     }
 
     public static void SaveEffects(Context context) {
-        SharedPreferences pref = context.getSharedPreferences("ImagePathList", context.MODE_PRIVATE);
+        SharedPreferences pref = context.getSharedPreferences("Effects", context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         editor.clear();
 
         editor.putBoolean("isEnableSlide", isEnableSlide);
         editor.putString("slideType", slideType);;
         editor.putInt("slideSpeed", slideSpeed);
+        editor.putInt("slideDelay", slideDelay);
 
         editor.putBoolean("isEnableEffect", isEnableEffect);
         editor.putString("effectParticleType", effectParticleType);

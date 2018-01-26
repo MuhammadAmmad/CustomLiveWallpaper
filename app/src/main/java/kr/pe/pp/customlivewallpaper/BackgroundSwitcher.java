@@ -43,6 +43,13 @@ public class BackgroundSwitcher {
     }
 
     public void init(Context context) {
+        init(context, this.switchMode);
+    }
+    public void init(Context context, SwitchMode switchMode) {
+        this.switchingSpeed = ApplicationData.getSlideSpeed() + 1;
+        this.switchingDelay = (ApplicationData.getSlideDelay() + 2) * 1000;
+        this.switchMode = switchMode;
+        this.currentSwitchMode = switchMode;
         this.context = context;
         screenSize = Util.getScreenSize(context);
         bitmapHolder.init(context);
@@ -53,13 +60,18 @@ public class BackgroundSwitcher {
     }
 
     public void active() {
-        timerTaskSwitcher = new BackgroundSwitcher.SwitcherTimerTask();
-        timerSwitcher = new Timer();
-        timerSwitcher.schedule(timerTaskSwitcher, 0, switchingDelay);
+        if(ApplicationData.getIsEnableSlide()) {
+            timerTaskSwitcher = new BackgroundSwitcher.SwitcherTimerTask();
+            timerSwitcher = new Timer();
+            timerSwitcher.schedule(timerTaskSwitcher, 0, switchingDelay);
+        }
     }
 
     public void deactive() {
-        timerSwitcher.cancel();
+        if(timerSwitcher != null) {
+            timerSwitcher.cancel();
+            timerSwitcher = null;
+        }
     }
 
     public void draw(Canvas canvas, int x, int y) {
@@ -71,39 +83,94 @@ public class BackgroundSwitcher {
                 BitmapWrapper nextWrapper = bitmapHolder.getNextBitmap();
                 Bitmap nextBitmap = nextWrapper.getBitmap();
 
-                if(currentSwitchMode == SwitchMode.SWITCH_FADE) {
-                    switchingAlpha += switchingSpeed;
-                    Paint nextPaint = new Paint();
-                    nextPaint.setAlpha(switchingAlpha);
+                switch(currentSwitchMode) {
+                    case Slide: {
+                        switchingCurrentX -= switchingStep;
+                        switchingNextX -= switchingStep;
 
-                    canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
-                    canvas.drawBitmap(nextBitmap, nextWrapper.getLeftBase() - x, nextWrapper.getTopBase() - y, nextPaint);
+                        canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x + switchingCurrentX, currentWrapper.getTopBase() - y, null);
+                        canvas.drawBitmap(nextBitmap, nextWrapper.getLeftBase() - x + switchingNextX, nextWrapper.getTopBase() - y, null);
 
-                    if (switchingAlpha + switchingSpeed >= 255) {
-                        isSwitching = false;
-                        bitmapHolder.next();
+                        if(switchingNextX - switchingStep <= 0) {
+                            isSwitching = false;
+                            bitmapHolder.next();
+                        }
+                        break;
                     }
-                } else if(currentSwitchMode == SwitchMode.SWITCH_SLIDE_NORMAL) {
-                    switchingCurrentX -= switchingStep;
-                    switchingNextX -= switchingStep;
+                    case Cover: {
+                        switchingCurrentX -= (switchingStep / 2);
+                        switchingNextX -= switchingStep;
 
-                    canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x + switchingCurrentX, currentWrapper.getTopBase() - y, null);
-                    canvas.drawBitmap(nextBitmap, nextWrapper.getLeftBase() - x + switchingNextX, nextWrapper.getTopBase() - y, null);
+                        canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x + switchingCurrentX, currentWrapper.getTopBase() - y, null);
+                        canvas.drawBitmap(nextBitmap, nextWrapper.getLeftBase() - x + switchingNextX, nextWrapper.getTopBase() - y, null);
 
-                    if(switchingNextX - switchingStep <= 0) {
-                        isSwitching = false;
-                        bitmapHolder.next();
+                        if(switchingNextX - switchingStep <= 0) {
+                            isSwitching = false;
+                            bitmapHolder.next();
+                        }
+                        break;
                     }
-                } else if(currentSwitchMode == SwitchMode.SWITCH_SLIDE_OVERLAY) {
-                    switchingCurrentX -= (switchingStep / 2);
-                    switchingNextX -= switchingStep;
-
-                    canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x + switchingCurrentX, currentWrapper.getTopBase() - y, null);
-                    canvas.drawBitmap(nextBitmap, nextWrapper.getLeftBase() - x + switchingNextX, nextWrapper.getTopBase() - y, null);
-
-                    if(switchingNextX - switchingStep <= 0) {
+                    case Withdraw: {
+                        canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
                         isSwitching = false;
                         bitmapHolder.next();
+                        break;
+                    }
+                    case Wipe: {
+                        canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
+                        isSwitching = false;
+                        bitmapHolder.next();
+                        break;
+                    }
+                    case Fade: {
+                        switchingAlpha += switchingSpeed;
+                        Paint nextPaint = new Paint();
+                        nextPaint.setAlpha(switchingAlpha);
+
+                        canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
+                        canvas.drawBitmap(nextBitmap, nextWrapper.getLeftBase() - x, nextWrapper.getTopBase() - y, nextPaint);
+
+                        if (switchingAlpha + switchingSpeed >= 255) {
+                            isSwitching = false;
+                            bitmapHolder.next();
+                        }
+                        break;
+                    }
+                    case BoxIn: {
+                        canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
+                        isSwitching = false;
+                        bitmapHolder.next();
+                        break;
+                    }
+                    case BoxOut: {
+                        canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
+                        isSwitching = false;
+                        bitmapHolder.next();
+                        break;
+                    }
+                    case CircleIn: {
+                        canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
+                        isSwitching = false;
+                        bitmapHolder.next();
+                        break;
+                    }
+                    case CircleOut: {
+                        canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
+                        isSwitching = false;
+                        bitmapHolder.next();
+                        break;
+                    }
+                    case SplitIn: {
+                        canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
+                        isSwitching = false;
+                        bitmapHolder.next();
+                        break;
+                    }
+                    case SplitOut: {
+                        canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
+                        isSwitching = false;
+                        bitmapHolder.next();
+                        break;
                     }
                 }
             } else {
@@ -116,8 +183,8 @@ public class BackgroundSwitcher {
         @Override
         public void run() {
             if(!isSwitching && bitmapHolder.isLoadComplete()) {
-                if(switchMode == SwitchMode.SWITCH_RANDOM) {
-                    currentSwitchMode = SwitchMode.values()[(int)(Math.random() * SwitchMode.SWITCH_RANDOM.getValue())];
+                if(switchMode == SwitchMode.Random) {
+                    currentSwitchMode = SwitchMode.values()[(int)(Math.random() * (SwitchMode.SplitOut.getValue()+1))];
                 }
 
                 isSwitching = true;
@@ -130,10 +197,18 @@ public class BackgroundSwitcher {
     }
 
     public enum SwitchMode {
-        SWITCH_SLIDE_NORMAL(0),
-        SWITCH_SLIDE_OVERLAY(1),
-        SWITCH_FADE(2),
-        SWITCH_RANDOM(3);
+        Slide(0),
+        Cover(1),
+        Withdraw(2),
+        Wipe(3),
+        Fade(4),
+        BoxIn(5),
+        BoxOut(6),
+        CircleIn(7),
+        CircleOut(8),
+        SplitIn(9),
+        SplitOut(10),
+        Random(99);
 
         private final int value;
         private SwitchMode(int value) {

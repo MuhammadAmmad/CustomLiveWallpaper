@@ -4,4 +4,7 @@
     <color name="colorPrimaryDark">#303f9f</color>
     <color name="colorAccent">#ff4081</color>
     <color name="colorEmptyText">#a9a9a9</color>
+    <color name="effectScreenLine">#dedede</color>
+    <color name="effectScreenTab">#c0dcff</color>
+    <color name="effectScreenTabUnderline">#94b9ff</color>
 </resources>

@@ -74,6 +74,8 @@ public class LiveWallpaperService extends WallpaperService {
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
+
+            ApplicationData.Load(getApplicationContext());
             drawer.init(getApplicationContext());
             Log.d("LiveWallpaperService", "LiveWallpaperEngine::onCreate");
         }

@@ -14,6 +14,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.util.Log;
+import android.widget.Switch;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -36,7 +37,7 @@ public class LiveWallpaperDrawer implements IDrawer {
     double basePitch = 0, baseRoll = 0;
 
     public LiveWallpaperDrawer() {
-        backgroundSwitcher = new BackgroundSwitcher(BackgroundSwitcher.SwitchMode.SWITCH_SLIDE_OVERLAY);
+        backgroundSwitcher = new BackgroundSwitcher(BackgroundSwitcher.SwitchMode.Cover);
         particleDrawer = new ParticleDrawer();
     }
 
@@ -44,7 +45,12 @@ public class LiveWallpaperDrawer implements IDrawer {
     public void init(Context context) {
         this.context = context;
 
-        backgroundSwitcher.init(context);
+        BackgroundSwitcher.SwitchMode switchMode = null;
+        try {
+            switchMode = BackgroundSwitcher.SwitchMode.valueOf(ApplicationData.getSlideType());
+        } catch(IllegalArgumentException ex) { }
+        if(switchMode == null) switchMode = BackgroundSwitcher.SwitchMode.Cover;
+        backgroundSwitcher.init(context, switchMode);
         angleSensor = new AngleSensor(context);
         particleDrawer.init(context);
     }
@@ -95,7 +101,9 @@ public class LiveWallpaperDrawer implements IDrawer {
             offsetY = (int) (((float) BackgroundSwitcher.margin / (float) 90) * diffRoll);
         }
         backgroundSwitcher.draw(canvas, offsetX, offsetY);
-        particleDrawer.draw(canvas, offsetX, offsetY);
+        if(ApplicationData.getIsEnableEffect()) {
+            particleDrawer.draw(canvas, offsetX, offsetY);
+        }
 
         Paint paint = new Paint();
         paint.setAntiAlias(true);
