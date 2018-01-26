@@ -1,17 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string-array name="slide_name">
+        <item>슬라이드</item>
+        <item>덮기</item>
+        <item>치우기</item>
+        <item>닦아내기</item>
+        <item>페이드</item>
+        <item>사각형 모으기</item>
+        <item>사각형 펼치기</item>
+        <item>원형 모으기</item>
+        <item>원형 펼치기</item>
+        <item>안쪽으로 나누기</item>
+        <item>바깥쪽으로 나누기</item>
+    </string-array>
+    <string-array name="slide_value">
+        <item>Slide</item>
+        <item>Cover</item>
+        <item>Withdraw</item>
+        <item>Wipe</item>
+        <item>Fade</item>
+        <item>BoxIn</item>
+        <item>BoxOut</item>
+        <item>CircleIn</item>
+        <item>CircleOut</item>
+        <item>SplitIn</item>
+        <item>SplitOut</item>
+    </string-array>
+
     <string-array name="effect_name">
         <item>별</item>
         <item>눈</item>
         <item>비눗방울</item>
         <item>꽃</item>
-        <item>효과 이미지 선택</item>
     </string-array>
     <string-array name="effect_value">
         <item>particle_star</item>
         <item>particle_snow</item>
         <item>particle_bubble</item>
         <item>particle_flower</item>
-        <item>customize</item>
     </string-array>
 </resources>
