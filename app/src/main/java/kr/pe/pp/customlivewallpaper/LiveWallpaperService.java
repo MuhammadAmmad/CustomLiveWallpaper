@@ -27,6 +27,7 @@ public class LiveWallpaperService extends WallpaperService {
 
     private class LiveWallpaperEngine extends Engine {
         private boolean visible = false;
+        private boolean isDraw = true;
         private final Handler handler = new Handler();
         private final Runnable drawRunner = new Runnable() {
             @Override
@@ -38,6 +39,12 @@ public class LiveWallpaperService extends WallpaperService {
                 drawer.draw(canvas);
 
                 holder.unlockCanvasAndPost(canvas);
+            }
+        };
+        private final Runnable updateRunner = new Runnable() {
+            @Override
+            public void run() {
+                drawer.update();
             }
         };
 
@@ -53,11 +60,18 @@ public class LiveWallpaperService extends WallpaperService {
                     try {
                         if(visible) {
                             long before = System.currentTimeMillis();
-                            drawRunner.run();
+                            updateRunner.run();
+                            if(isDraw) {
+                                drawRunner.run();
+                            } else {
+                                isDraw = true;
+                            }
                             long runningTime = System.currentTimeMillis() - before;
 
                             if(runningSleepTick - runningTime > 0) {
                                 Thread.sleep(runningSleepTick - runningTime);
+                            } else if(runningTime << 1 >= runningSleepTick) {
+                                //isDraw = false;
                             }
                         } else {
                             Thread.sleep(idleSleepTick);
@@ -103,6 +117,7 @@ public class LiveWallpaperService extends WallpaperService {
             this.visible = visible;
             if (visible) {
                 drawer.active();
+                updateRunner.run();
                 drawRunner.run();
                 animationLoop = new AnimationRunnable();
                 animationLoop.running = true;

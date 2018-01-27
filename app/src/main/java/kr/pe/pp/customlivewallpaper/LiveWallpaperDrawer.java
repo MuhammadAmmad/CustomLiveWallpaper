@@ -35,6 +35,7 @@ public class LiveWallpaperDrawer implements IDrawer {
     boolean isGetBaseAngle = false;
     AngleSensor angleSensor = null;
     double basePitch = 0, baseRoll = 0;
+    int offsetX = 0, offsetY = 0;
 
     public LiveWallpaperDrawer() {
         backgroundSwitcher = new BackgroundSwitcher(BackgroundSwitcher.SwitchMode.Cover);
@@ -87,8 +88,9 @@ public class LiveWallpaperDrawer implements IDrawer {
     }
 
     @Override
-    public void draw(Canvas canvas) {
-        int offsetX = 0, offsetY = 0;
+    public void update() {
+        offsetX = 0;
+        offsetY = 0;
         if(isGetBaseAngle && isBackground3D) {
             double diffPitch = angleSensor.pitch - basePitch;
             if (diffPitch > 90) diffPitch = 90;
@@ -100,6 +102,13 @@ public class LiveWallpaperDrawer implements IDrawer {
             if (diffRoll < -90) diffRoll = -90;
             offsetY = (int) (((float) BackgroundSwitcher.margin / (float) 90) * diffRoll);
         }
+
+        backgroundSwitcher.update();
+        particleDrawer.update();
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
         backgroundSwitcher.draw(canvas, offsetX, offsetY);
         if(ApplicationData.getIsEnableEffect()) {
             particleDrawer.draw(canvas, offsetX, offsetY);

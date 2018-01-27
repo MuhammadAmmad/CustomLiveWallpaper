@@ -21,7 +21,8 @@ import java.util.TimerTask;
  */
 
 public class ParticleDrawer {
-    private class GenerateTimerTask extends TimerTask {
+
+    private class GenerateTimerTask implements Runnable {
         @Override
         public void run() {
             Particle particle = new Particle();
@@ -33,7 +34,7 @@ public class ParticleDrawer {
             });
 
             if(bitmapParticles.size() > 0) {
-                particle.init(context, bitmapParticles.get((int)(Math.random() * bitmapParticles.size())), true);
+                particle.init(context, bitmapParticles.get((int)(Math.random() * bitmapParticles.size())), ApplicationData.getEffectIsUseRotate());
                 addQueue.add(particle);
             }
         }
@@ -42,18 +43,22 @@ public class ParticleDrawer {
     private Context context = null;
     private ArrayList<Bitmap> bitmapParticles = new ArrayList<>();
     private ArrayList<Particle> particles = new ArrayList<>();
-    private TimerTask timerTaskGenerator = null;
-    private Timer timerGenerator = null;
+    private boolean timerGeneratorStarted = false;
+    private int timerGeneratorTick = 0;
+    private int timerGeneratorFinishTick = 0;
+    private int generateSpeed = 300;
+    private Runnable timerTaskGenerator = new GenerateTimerTask();
     private Queue<Particle> removeQueue = new LinkedList<Particle>();
     private Queue<Particle> addQueue = new LinkedList<Particle>();
 
     public void init(Context context) {
         this.context = context;
 
+        generateSpeed = (int)((10 - ApplicationData.getEffectDensity()) / 2.0f * 100.0f) + 100;   // 150 ~ 600
         final BitmapFactory.Options options = new BitmapFactory.Options();
-        //final int particleResourceId = Util.getResourceId("particle_snow", Drawable.class);
+        final int particleResourceId = Util.getResourceId("drawable", ApplicationData.getEffectParticleType(), context);
         options.inSampleSize = 2;
-        Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.particle_snow, options);
+        Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), particleResourceId, options);
         int size = bmp.getHeight();
         int count = (int)(bmp.getWidth() / size);
         Log.d("__Debug__", "Particle Count : " + count + ", " + bmp.getWidth() + " / " + size);
@@ -72,18 +77,30 @@ public class ParticleDrawer {
     }
 
     public void active() {
-        timerTaskGenerator = new GenerateTimerTask();
-        timerGenerator = new Timer();
-        timerGenerator.schedule(timerTaskGenerator, 0, 300);
+        timerGeneratorStarted = true;
+        timerGeneratorTick = 0;
+        timerGeneratorFinishTick = (int)(generateSpeed / 1000.0f * 60.0f);
     }
 
     public void deactive() {
-        timerGenerator.cancel();
+        timerGeneratorStarted = false;
+        timerGeneratorTick = 0;
+        timerGeneratorFinishTick = (int)(generateSpeed / 1000.0f * 60.0f);
     }
 
-    public void draw(Canvas canvas, int offsetX, int offsetY) {
+    private void timerCheck() {
+        if(timerGeneratorStarted) {
+            timerGeneratorTick++;
+            if(timerGeneratorTick >= timerGeneratorFinishTick) {
+                timerGeneratorTick = 0;
+                timerTaskGenerator.run();
+            }
+        }
+    }
+
+    public void update() {
         for(Particle particle : particles) {
-            particle.draw(canvas, offsetX, offsetY);
+            particle.update();
         }
 
         Particle particle = removeQueue.poll();
@@ -94,6 +111,14 @@ public class ParticleDrawer {
         particle = addQueue.poll();
         if(particle != null) {
             particles.add(particle);
+        }
+
+        timerCheck();
+    }
+
+    public void draw(Canvas canvas, int offsetX, int offsetY) {
+        for(Particle particle : particles) {
+            particle.draw(canvas, offsetX, offsetY);
         }
     }
 }

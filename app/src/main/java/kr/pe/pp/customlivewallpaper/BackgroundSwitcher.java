@@ -25,8 +25,10 @@ public class BackgroundSwitcher {
     Util.Size screenSize = null;
     Context context = null;
 
-    Timer timerSwitcher = null;
-    TimerTask timerTaskSwitcher = null;
+    boolean timerIsStarted = false;
+    int timerTick = 0;
+    int timerFinishTick = 0;
+    Runnable timerTaskSwitcher = null;
 
     boolean isSwitching = false;
     int switchingDelay = 7000;
@@ -47,7 +49,7 @@ public class BackgroundSwitcher {
     }
     public void init(Context context, SwitchMode switchMode) {
         this.switchingSpeed = ApplicationData.getSlideSpeed() + 1;
-        this.switchingDelay = (ApplicationData.getSlideDelay() + 2) * 1000;
+        this.switchingDelay = (ApplicationData.getSlideDelay() + 3) * 1000;
         this.switchMode = switchMode;
         this.currentSwitchMode = switchMode;
         this.context = context;
@@ -62,16 +64,30 @@ public class BackgroundSwitcher {
     public void active() {
         if(ApplicationData.getIsEnableSlide()) {
             timerTaskSwitcher = new BackgroundSwitcher.SwitcherTimerTask();
-            timerSwitcher = new Timer();
-            timerSwitcher.schedule(timerTaskSwitcher, 0, switchingDelay);
+            timerIsStarted = true;
+            timerTick = 0;
+            timerFinishTick = (int)(switchingDelay / 1000.0f * 60.0f);
         }
     }
 
     public void deactive() {
-        if(timerSwitcher != null) {
-            timerSwitcher.cancel();
-            timerSwitcher = null;
+        timerIsStarted = false;
+        timerTick = 0;
+        timerFinishTick = (int)(switchingDelay / 1000.0f * 60.0f);
+    }
+
+    private void timerCheck() {
+        if(timerIsStarted) {
+            timerTick ++;
+            if(timerTick >= timerFinishTick) {
+                timerTick = 0;
+                timerTaskSwitcher.run();
+            }
         }
+    }
+
+    public void update() {
+        timerCheck();
     }
 
     public void draw(Canvas canvas, int x, int y) {
@@ -111,9 +127,20 @@ public class BackgroundSwitcher {
                         break;
                     }
                     case Withdraw: {
-                        canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
-                        isSwitching = false;
-                        bitmapHolder.next();
+                        switchingCurrentX -= switchingStep;
+                        if(switchingNextX > 0) {
+                            switchingNextX -= (switchingStep / 2);
+                        } else {
+                            switchingNextX = 0;
+                        }
+
+                        canvas.drawBitmap(nextBitmap, nextWrapper.getLeftBase() - x + switchingNextX, nextWrapper.getTopBase() - y, null);
+                        canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x + switchingCurrentX, currentWrapper.getTopBase() - y, null);
+
+                        if(switchingCurrentX <= -currentBitmap.getWidth()) {
+                            isSwitching = false;
+                            bitmapHolder.next();
+                        }
                         break;
                     }
                     case Wipe: {
@@ -179,7 +206,7 @@ public class BackgroundSwitcher {
         }
     }
 
-    private class SwitcherTimerTask extends TimerTask {
+    private class SwitcherTimerTask implements Runnable {
         @Override
         public void run() {
             if(!isSwitching && bitmapHolder.isLoadComplete()) {
@@ -188,10 +215,65 @@ public class BackgroundSwitcher {
                 }
 
                 isSwitching = true;
-                switchingAlpha = 0;
-                switchingCurrentX = 0;
-                switchingNextX = screenSize.getWidth();
                 switchingStep = screenSize.getWidth() / 100 * switchingSpeed;
+
+                switch(currentSwitchMode) {
+                    case Slide: {
+                        switchingCurrentX = 0;
+                        switchingNextX = screenSize.getWidth();
+                        break;
+                    }
+                    case Cover: {
+                        switchingCurrentX = 0;
+                        switchingNextX = screenSize.getWidth();
+                        break;
+                    }
+                    case Withdraw: {
+                        switchingCurrentX = 0;
+                        switchingNextX = screenSize.getWidth() / 2;
+                        break;
+                    }
+                    case Wipe: {
+                        switchingCurrentX = 0;
+                        switchingNextX = screenSize.getWidth();
+                        break;
+                    }
+                    case Fade: {
+                        switchingAlpha = 0;
+                        break;
+                    }
+                    case BoxIn: {
+                        switchingCurrentX = 0;
+                        switchingNextX = screenSize.getWidth();
+                        break;
+                    }
+                    case BoxOut: {
+                        switchingCurrentX = 0;
+                        switchingNextX = screenSize.getWidth();
+                        break;
+                    }
+                    case CircleIn: {
+                        switchingCurrentX = 0;
+                        switchingNextX = screenSize.getWidth();
+                        break;
+                    }
+                    case CircleOut: {
+                        switchingCurrentX = 0;
+                        switchingNextX = screenSize.getWidth();
+                        break;
+                    }
+                    case SplitIn: {
+                        switchingCurrentX = 0;
+                        switchingNextX = screenSize.getWidth();
+                        break;
+                    }
+                    case SplitOut: {
+                        switchingCurrentX = 0;
+                        switchingNextX = screenSize.getWidth();
+                        break;
+                    }
+                }
+
             }
         }
     }

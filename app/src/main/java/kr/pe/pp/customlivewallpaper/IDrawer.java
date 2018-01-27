@@ -13,4 +13,5 @@ public interface IDrawer {
     void destroy();
     void active();
     void deactive();
+    void update();
 }

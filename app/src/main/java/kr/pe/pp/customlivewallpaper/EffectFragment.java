@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.text.Layout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,8 +28,10 @@ public class EffectFragment extends Fragment {
     private CheckBox checkBoxSlideImage = null;
     private Spinner spinnerSlideType = null;
     private SeekBar seekBarSlideSpeed = null;
+    private SeekBar seekBarSlideDelay = null;
     private CheckBox checkBoxEffect = null;
     private Spinner spinnerEffectType = null;
+    private SeekBar seekBarEffectDensity = null;
     private Switch switchUseRotate = null;
     private RadioButton radioRotateLeft = null;
     private RadioButton radioRotateRight = null;
@@ -37,7 +40,7 @@ public class EffectFragment extends Fragment {
     private RadioButton radioMoveToBottom = null;
     private RadioButton radioMoveToRightBottom = null;
     private SeekBar seekBarMoveSpeed = null;
-    private SeekBar seekBarMoveVibrate = null;
+    //private SeekBar seekBarMoveVibrate = null;
     private SeekBar seekBarSize = null;
     private SeekBar seekBarSizeVibrate = null;
 
@@ -61,14 +64,22 @@ public class EffectFragment extends Fragment {
     }
 
     private void enableChildViews(ViewGroup group, View exceptView, boolean enable) {
+        enableChildViews(group, exceptView, enable, true);
+    }
+    private void enableChildViews(ViewGroup group, View exceptView, boolean enable, boolean main) {
         for(int i=0; i<group.getChildCount(); i++) {
             View view = group.getChildAt(i);
             if(view != exceptView) {
                 view.setEnabled(enable);
             }
             if(view instanceof ViewGroup) {
-                enableChildViews((ViewGroup)view, exceptView, enable);
+                enableChildViews((ViewGroup)view, exceptView, enable, false);
             }
+        }
+        if(main && enable) {
+            radioRotateLeft.setEnabled(switchUseRotate.isChecked());
+            radioRotateRight.setEnabled(switchUseRotate.isChecked());
+            seekBarRotateSpeed.setEnabled(switchUseRotate.isChecked());
         }
     }
 
@@ -76,7 +87,7 @@ public class EffectFragment extends Fragment {
         checkBoxSlideImage.setChecked(ApplicationData.getIsEnableSlide());
 
         for(int i=0; i<slideValues.length; i++) {
-            if(slideValues[i] == ApplicationData.getSlideType()) {
+            if(slideValues[i].equals(ApplicationData.getSlideType())) {
                 spinnerSlideType.setSelection(i);
                 break;
             }
@@ -85,14 +96,18 @@ public class EffectFragment extends Fragment {
         seekBarSlideSpeed.setMax(10);
         seekBarSlideSpeed.setProgress(ApplicationData.getSlideSpeed());
 
+        seekBarSlideDelay.setMax(30);
+        seekBarSlideDelay.setProgress(ApplicationData.getSlideDelay());
+
         checkBoxEffect.setChecked(ApplicationData.getIsEnableEffect());
 
         for(int i=0; i<effectValues.length; i++) {
-            if(effectValues[i] == ApplicationData.getEffectParticleType()) {
+            if(effectValues[i].equals(ApplicationData.getEffectParticleType())) {
                 spinnerEffectType.setSelection(i);
             }
         }
-
+        seekBarEffectDensity.setMax(10);
+        seekBarEffectDensity.setProgress(ApplicationData.getEffectDensity());
         switchUseRotate.setChecked(ApplicationData.getEffectIsUseRotate());
         if(ApplicationData.getEffectIsRotateRight()) {
             radioRotateRight.setChecked(true);
@@ -114,8 +129,8 @@ public class EffectFragment extends Fragment {
         }
         seekBarMoveSpeed.setMax(10);
         seekBarMoveSpeed.setProgress(ApplicationData.getEffectMoveSpeed());
-        seekBarMoveVibrate.setMax(5);
-        seekBarMoveVibrate.setProgress(ApplicationData.getEffectMoveVibrate());
+        //seekBarMoveVibrate.setMax(5);
+        //seekBarMoveVibrate.setProgress(ApplicationData.getEffectMoveVibrate());
         seekBarSize.setMax(10);
         seekBarSize.setProgress(ApplicationData.getEffectSize());
         seekBarSizeVibrate.setMax(5);
@@ -126,9 +141,11 @@ public class EffectFragment extends Fragment {
         ApplicationData.setIsEnableSlide(checkBoxSlideImage.isChecked());
         ApplicationData.setSlideType(slideValues[spinnerSlideType.getSelectedItemPosition()]);
         ApplicationData.setSlideSpeed(seekBarSlideSpeed.getProgress());
+        ApplicationData.setSlideDelay(seekBarSlideDelay.getProgress());
 
         ApplicationData.setIsEnableEffect(checkBoxEffect.isChecked());
         ApplicationData.setEffectParticleType(effectValues[spinnerEffectType.getSelectedItemPosition()]);
+        ApplicationData.setEffectDensity(seekBarEffectDensity.getProgress());
         ApplicationData.setEffectIsUseRotate(switchUseRotate.isChecked());
         if(radioRotateLeft.isChecked()) ApplicationData.setEffectIsRotateRight(false);
         else if(radioRotateRight.isChecked()) ApplicationData.setEffectIsRotateRight(true);
@@ -139,7 +156,7 @@ public class EffectFragment extends Fragment {
         else if(radioMoveToRightBottom.isChecked()) ApplicationData.setEffectMoveDirection(ApplicationData.MoveDirection.RIGHT_DOWN);
 
         ApplicationData.setEffectMoveSpeed(seekBarMoveSpeed.getProgress());
-        ApplicationData.setEffectMoveVibrate(seekBarMoveVibrate.getProgress());
+        //ApplicationData.setEffectMoveVibrate(seekBarMoveVibrate.getProgress());
         ApplicationData.setEffectSize(seekBarSize.getProgress());
         ApplicationData.setEffectSizeVibrate(seekBarSizeVibrate.getProgress());;
     }
@@ -156,6 +173,8 @@ public class EffectFragment extends Fragment {
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 ConstraintLayout layout = (ConstraintLayout)compoundButton.getParent();
                 enableChildViews(layout, compoundButton, b);
+                ApplicationDataFromViews();
+                ApplicationData.SaveEffects(getContext());
             }
         };
         Spinner.OnItemSelectedListener spinnerChangedListener = new Spinner.OnItemSelectedListener() {
@@ -181,9 +200,13 @@ public class EffectFragment extends Fragment {
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         };
-        Switch.OnCheckedChangeListener switchChangedListener = new Switch.OnCheckedChangeListener() {
+        Switch.OnCheckedChangeListener switchUseRotateChangedListener = new Switch.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                radioRotateLeft.setEnabled(b);
+                radioRotateRight.setEnabled(b);
+                seekBarRotateSpeed.setEnabled(b);
+
                 ApplicationDataFromViews();
                 ApplicationData.SaveEffects(getContext());
             }
@@ -199,8 +222,10 @@ public class EffectFragment extends Fragment {
         checkBoxSlideImage = (CheckBox)getView().findViewById(R.id.checkBoxSlideImage);
         spinnerSlideType = (Spinner)getView().findViewById(R.id.spinnerSlideType);
         seekBarSlideSpeed = (SeekBar)getView().findViewById(R.id.seekBarSlideSpeed);
+        seekBarSlideDelay = (SeekBar)getView().findViewById(R.id.seekBarSlideDelay);
         checkBoxEffect = (CheckBox)getView().findViewById(R.id.checkBoxEffect);
         spinnerEffectType = (Spinner)getView().findViewById(R.id.spinnerEffectType);
+        seekBarEffectDensity = (SeekBar)getView().findViewById(R.id.seekBarEffectDensity);
         switchUseRotate = (Switch)getView().findViewById(R.id.switchUseRotate);
         radioRotateLeft = (RadioButton)getView().findViewById(R.id.radioRotateLeft);
         radioRotateRight = (RadioButton)getView().findViewById(R.id.radioRotateRight);
@@ -209,7 +234,7 @@ public class EffectFragment extends Fragment {
         radioMoveToBottom = (RadioButton)getView().findViewById(R.id.radioMoveToBottom);
         radioMoveToRightBottom = (RadioButton)getView().findViewById(R.id.radioMoveToRightBottom);
         seekBarMoveSpeed = (SeekBar)getView().findViewById(R.id.seekBarMoveSpeed);
-        seekBarMoveVibrate = (SeekBar)getView().findViewById(R.id.seekBarMoveVibrate);
+        //seekBarMoveVibrate = (SeekBar)getView().findViewById(R.id.seekBarMoveVibrate);
         seekBarSize = (SeekBar)getView().findViewById(R.id.seekBarSize);
         seekBarSizeVibrate = (SeekBar)getView().findViewById(R.id.seekBarSizeVibrate);
 
@@ -222,9 +247,11 @@ public class EffectFragment extends Fragment {
         checkBoxSlideImage.setOnCheckedChangeListener(disableCheckBoxChangeListener);
         spinnerSlideType.setOnItemSelectedListener(spinnerChangedListener);
         seekBarSlideSpeed.setOnSeekBarChangeListener(seekBarChangedListener);
+        seekBarSlideDelay.setOnSeekBarChangeListener(seekBarChangedListener);
         checkBoxEffect.setOnCheckedChangeListener(disableCheckBoxChangeListener);
         spinnerEffectType.setOnItemSelectedListener(spinnerChangedListener);
-        switchUseRotate.setOnCheckedChangeListener(switchChangedListener);
+        seekBarEffectDensity.setOnSeekBarChangeListener(seekBarChangedListener);
+        switchUseRotate.setOnCheckedChangeListener(switchUseRotateChangedListener);
         radioRotateLeft.setOnCheckedChangeListener(radioCheckedChangedListener);
         radioRotateRight.setOnCheckedChangeListener(radioCheckedChangedListener);
         seekBarRotateSpeed.setOnSeekBarChangeListener(seekBarChangedListener);
@@ -232,7 +259,7 @@ public class EffectFragment extends Fragment {
         radioMoveToBottom.setOnCheckedChangeListener(radioCheckedChangedListener);
         radioMoveToRightBottom.setOnCheckedChangeListener(radioCheckedChangedListener);
         seekBarMoveSpeed.setOnSeekBarChangeListener(seekBarChangedListener);
-        seekBarMoveVibrate.setOnSeekBarChangeListener(seekBarChangedListener);
+        //seekBarMoveVibrate.setOnSeekBarChangeListener(seekBarChangedListener);
         seekBarSize.setOnSeekBarChangeListener(seekBarChangedListener);
         seekBarSizeVibrate.setOnSeekBarChangeListener(seekBarChangedListener);
 

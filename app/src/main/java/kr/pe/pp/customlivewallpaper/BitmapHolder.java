@@ -56,25 +56,28 @@ public class BitmapHolder {
             public void run() {
                 // load current image
                 if(pathList.size() > 0) {
-                    Bitmap bmp = Util.createBitmapFromPath(pathList.get(currentIndex), screenSize.getWidth(), screenSize.getHeight());
-                    bmp = Util.resizeBitmapWithMargin(bmp, screenSize.getWidth(), screenSize.getHeight(), Util.ResizeMode.RESIZE_FIT_IMAGE, imageMargin, Util.CropMode.CROP_CENTER);
+                    Bitmap bitmap = Util.createBitmapFromPath(pathList.get(currentIndex), screenSize.getWidth(), screenSize.getHeight());
+                    Bitmap bmp = Util.resizeBitmapWithMargin(bitmap, screenSize.getWidth(), screenSize.getHeight(), Util.ResizeMode.RESIZE_FIT_IMAGE, imageMargin, Util.CropMode.CROP_CENTER);
                     current = new BitmapWrapper(self.context, bmp);
+                    bitmap.recycle();
                 }
 
                 // load next image
                 if(pathList.size() > 1) {
                     currentIndex++;
-                    Bitmap bmp = Util.createBitmapFromPath(pathList.get(currentIndex), screenSize.getWidth(), screenSize.getHeight());
-                    bmp = Util.resizeBitmapWithMargin(bmp, screenSize.getWidth(), screenSize.getHeight(), Util.ResizeMode.RESIZE_FIT_IMAGE, imageMargin, Util.CropMode.CROP_CENTER);
+                    Bitmap bitmap = Util.createBitmapFromPath(pathList.get(currentIndex), screenSize.getWidth(), screenSize.getHeight());
+                    Bitmap bmp = Util.resizeBitmapWithMargin(bitmap, screenSize.getWidth(), screenSize.getHeight(), Util.ResizeMode.RESIZE_FIT_IMAGE, imageMargin, Util.CropMode.CROP_CENTER);
                     next = new BitmapWrapper(self.context, bmp);
+                    bitmap.recycle();
                 }
 
                 // load afternext image
                 if(pathList.size() > 2) {
                     currentIndex++;
-                    Bitmap bmp = Util.createBitmapFromPath(pathList.get(currentIndex), screenSize.getWidth(), screenSize.getHeight());
-                    bmp = Util.resizeBitmapWithMargin(bmp, screenSize.getWidth(), screenSize.getHeight(), Util.ResizeMode.RESIZE_FIT_IMAGE, imageMargin, Util.CropMode.CROP_CENTER);
+                    Bitmap bitmap = Util.createBitmapFromPath(pathList.get(currentIndex), screenSize.getWidth(), screenSize.getHeight());
+                    Bitmap bmp = Util.resizeBitmapWithMargin(bitmap, screenSize.getWidth(), screenSize.getHeight(), Util.ResizeMode.RESIZE_FIT_IMAGE, imageMargin, Util.CropMode.CROP_CENTER);
                     afternext = new BitmapWrapper(self.context, bmp);
+                    bitmap.recycle();
                 }
                 isLoading = false;
             }

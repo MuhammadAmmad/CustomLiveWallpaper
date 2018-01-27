@@ -37,6 +37,7 @@ public class ApplicationData {
 
     private static boolean isEnableEffect = false;
     private static String effectParticleType = "";
+    private static int effectDensity = 5;
     private static boolean effectIsUseRotate = false;
     private static boolean effectIsRotateRight = true;
     private static int effectRotateSpeed = 5;
@@ -86,6 +87,8 @@ public class ApplicationData {
 
     public static boolean getIsEnableEffect() { return isEnableEffect; }
     public static void setIsEnableEffect(boolean v) { isEnableEffect = v; }
+    public static int getEffectDensity() { return effectDensity; }
+    public static void setEffectDensity(int v) { effectDensity = v; }
     public static String getEffectParticleType() { return effectParticleType; }
     public static void setEffectParticleType(String v) { effectParticleType = v; }
     public static boolean getEffectIsUseRotate() { return effectIsUseRotate; }
@@ -110,12 +113,13 @@ public class ApplicationData {
 
         isEnableSlide = pref.getBoolean("isEnableSlide", true);
         slideType = pref.getString("slideType", "");;
-        slideSpeed = pref.getInt("slideSpeed", 5);
+        slideSpeed = pref.getInt("slideSpeed", 4);
         slideDelay = pref.getInt("slideDelay", 5);
 
-        isEnableEffect = pref.getBoolean("isEnableEffect", false);
+        isEnableEffect = pref.getBoolean("isEnableEffect", true);
         effectParticleType = pref.getString("effectParticleType", "");
-        effectIsUseRotate = pref.getBoolean("effectIsUseRotate", false);
+        effectDensity = pref.getInt("effectDensity", 5);
+        effectIsUseRotate = pref.getBoolean("effectIsUseRotate", true);
         effectIsRotateRight = pref.getBoolean("effectIsRotateRight", true);
         effectRotateSpeed = pref.getInt("effectRotateSpeed", 5);
         effectMoveDirection = MoveDirection.values()[pref.getInt("effectMoveDirection", MoveDirection.DOWN.getValue())];
@@ -137,6 +141,7 @@ public class ApplicationData {
 
         editor.putBoolean("isEnableEffect", isEnableEffect);
         editor.putString("effectParticleType", effectParticleType);
+        editor.putInt("effectDensity", effectDensity);
         editor.putBoolean("effectIsUseRotate", effectIsUseRotate);
         editor.putBoolean("effectIsRotateRight", effectIsRotateRight);
         editor.putInt("effectRotateSpeed", effectRotateSpeed);

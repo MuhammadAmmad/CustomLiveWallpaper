@@ -15,6 +15,7 @@ import java.util.ArrayList;
  */
 
 public class Particle {
+
     public interface ParticleEventListener {
         void onParticleDestroy(Particle particle);
     }
@@ -24,18 +25,28 @@ public class Particle {
     private Util.Size screenSize = null;
 
     private boolean isRotate = true;
+    private boolean isRotateRight = true;
 
-    private int particleSpeed = 4;
+    private float particleSpeed = 4;
     private int particleRotateSpeed = 5;
+    private float particleHorMoveSpeed = 0.0f;
 
     private int particleAngle = 0;
-    private int particleX = 0;
-    private int particleY = 0;
+    private float particleX = 0;
+    private float particleY = 0;
     private float particleScale = 1.0f;
+    private float particleScaleVibrateMax = 0.0f;
+    private float particleScaleVibrateStep = 0.01f;
+    private float particleScaleVibrateCurrent = 0.0f;
     private float particleRotateCenter = 0.0f;
     private Paint particlePaint = null;
     private Matrix particleMatrix = null;
     private boolean isFinish = false;
+
+    private int bitmapWidth = 0;
+    private int bitmapHeight = 0;
+    private int bitmapHalfWidth = 0;
+    private int bitmapHalfHeight = 0;
 
     public void setParticleEventListener(ParticleEventListener listener) {
         particleEventListener = listener;
@@ -46,12 +57,34 @@ public class Particle {
         this.bitmapParticle = bitmapParticle;
         this.screenSize = Util.getScreenSize(context);
         this.isRotate = isRotate;
+        this.isRotateRight = ApplicationData.getEffectIsRotateRight();
 
-        particleScale = (float)((Math.random() * 60) + 20) / 100.0f;
+        bitmapWidth = bitmapParticle.getWidth();
+        bitmapHeight = bitmapParticle.getHeight();
+        bitmapHalfWidth = bitmapWidth / 2;
+        bitmapHalfHeight = bitmapHeight / 2;
+
+        particleScaleVibrateMax = 0.4f / 4 * ApplicationData.getEffectSizeVibrate();
+        particleScaleVibrateStep = 0.01f;
+        particleScaleVibrateCurrent = 0.0f;
+        particleScale = (float)((Math.random() * 30) + (30 / 10 * (ApplicationData.getEffectSize() + 1))) / 100.0f;
         particleRotateCenter = 2 / particleScale;
-        particleSpeed = (int)(particleScale * 8);           // speed 2 ~ 7
-        particleRotateSpeed = (int)(Math.random() * 6) + 2;    // rotate speed 2 ~ 7
-        particleX = (int)(Math.random() * screenSize.getWidth());
+        particleSpeed = particleScale * (4 + ApplicationData.getEffectMoveSpeed());           // speed 2 ~ 7
+        particleRotateSpeed = (int)(Math.random() * 6) + (ApplicationData.getEffectRotateSpeed() / 2) + 1;    // rotate speed 2 ~ 7
+        switch(ApplicationData.getEffectMoveDirection()) {
+            case DOWN:
+                particleHorMoveSpeed = 0;
+                particleX = (int)(Math.random() * screenSize.getWidth());
+                break;
+            case LEFT_DOWN:
+                particleHorMoveSpeed = -(particleSpeed / 2);
+                particleX = (int)(Math.random() * (screenSize.getWidth() * 2));
+                break;
+            case RIGHT_DOWN:
+                particleHorMoveSpeed = particleSpeed / 2;
+                particleX = (int)(Math.random() * (screenSize.getWidth() * 2)) - screenSize.getWidth();
+                break;
+        }
         particleY = bitmapParticle.getHeight() * -1;
         particlePaint = new Paint();
         particleMatrix = new Matrix();
@@ -66,6 +99,57 @@ public class Particle {
     public void deactive() {
     }
 
+    public void update() {
+        if(bitmapParticle == null || isFinish) return;
+
+        particleY += particleSpeed;
+        particleX += particleHorMoveSpeed;
+        if(particleY >= screenSize.getHeight() + bitmapHeight) {
+            isFinish = true;
+            if(particleEventListener != null) {
+                particleEventListener.onParticleDestroy(this);
+            }
+            return;
+        } else if(particleHorMoveSpeed > 0 && particleX >= screenSize.getWidth() + bitmapWidth) {
+            isFinish = true;
+            if(particleEventListener != null) {
+                particleEventListener.onParticleDestroy(this);
+            }
+            return;
+        } else if(particleHorMoveSpeed < 0 && particleX <= -bitmapWidth) {
+            isFinish = true;
+            if(particleEventListener != null) {
+                particleEventListener.onParticleDestroy(this);
+            }
+            return;
+        } else if(particleHorMoveSpeed > 0 && particleX < -bitmapWidth) {
+            return;
+        } else if(particleHorMoveSpeed < 0 && particleX > screenSize.getWidth() + bitmapWidth) {
+            return;
+        }
+
+        particleScaleVibrateCurrent += particleScaleVibrateStep;
+        if(particleScaleVibrateCurrent >= particleScaleVibrateMax || particleScaleVibrateCurrent <= 0) {
+            particleScaleVibrateStep *= -1;
+            particleScaleVibrateCurrent += particleScaleVibrateStep;
+        }
+
+        if(isRotate) {
+            if (isRotateRight) {
+                particleAngle += particleRotateSpeed;
+                if (particleAngle >= 360) {
+                    particleAngle -= 360;
+                }
+            } else {
+                particleAngle -= particleRotateSpeed;
+                if (particleAngle < 0) {
+                    particleAngle += 360;
+                }
+            }
+            particleRotateCenter = (2 / (particleScale + particleScaleVibrateCurrent));
+        }
+    }
+
     public void draw(Canvas canvas, int offsetX, int offsetY) {
         if(bitmapParticle == null || isFinish) return;
 
@@ -73,25 +157,14 @@ public class Particle {
 
         // rotate
         if(isRotate) {
-            particleAngle += particleRotateSpeed;
-            if (particleAngle >= 360) {
-                particleAngle -= 360;
-            }
-            particleMatrix.postRotate(particleAngle, bitmapParticle.getWidth() / particleRotateCenter, bitmapParticle.getHeight() / particleRotateCenter);
+            particleMatrix.postRotate(particleAngle, bitmapWidth / particleRotateCenter, bitmapHeight / particleRotateCenter);
         }
 
         // translate
-        particleY += particleSpeed;
-        particleMatrix.postTranslate(particleX - (offsetX * (0.8f - particleScale)), particleY - (offsetY * (0.8f - particleScale)));
-        if(particleY >= screenSize.getHeight() + bitmapParticle.getHeight()) {
-            isFinish = true;
-            if(particleEventListener != null) {
-                particleEventListener.onParticleDestroy(this);
-            }
-        }
+        particleMatrix.postTranslate(particleX - (offsetX * (0.8f - particleScale)) - (bitmapHalfWidth * particleScaleVibrateCurrent), particleY - (offsetY * (0.8f - particleScale)) - (bitmapHalfHeight * particleScaleVibrateCurrent));
 
         // scale
-        particleMatrix.preScale(particleScale, particleScale);
+        particleMatrix.preScale(particleScale + particleScaleVibrateCurrent, particleScale + particleScaleVibrateCurrent);
 
         canvas.drawBitmap(bitmapParticle, particleMatrix, null);
     }

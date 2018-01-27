@@ -1,8 +1,11 @@
 package kr.pe.pp.customlivewallpaper;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
@@ -225,6 +228,21 @@ public class Util {
         }
         Log.d("__Debug__", "Crop(" + cropX + ", " + cropY + ", " + cropWidth + ", " + cropHeight + ")");
         return Bitmap.createBitmap(src, cropX, cropY, cropWidth, cropHeight);
+    }
+
+    public static int getResourceId(String defType, String resName, Context context) {
+
+        Context resContext = null;
+        try {
+            resContext = context.createPackageContext(context.getPackageName(), 0);
+        } catch(PackageManager.NameNotFoundException ex) {
+            return -1;
+        }
+
+        Resources res = resContext.getResources();
+
+        int id = res.getIdentifier(resName, defType, context.getPackageName());
+        return id;
     }
 
     public static int getResourceId(String resourceName, Class<?> c) {
