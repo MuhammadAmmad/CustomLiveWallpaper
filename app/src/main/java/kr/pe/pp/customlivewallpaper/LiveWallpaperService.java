@@ -34,7 +34,12 @@ public class LiveWallpaperService extends WallpaperService {
             public void run() {
                 SurfaceHolder holder = getSurfaceHolder();
 
-                Canvas canvas = holder.lockCanvas();
+                Canvas canvas = null;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    canvas = holder.lockHardwareCanvas();
+                } else {
+                    canvas = holder.lockCanvas();
+                }
 
                 drawer.draw(canvas);
 
@@ -88,6 +93,7 @@ public class LiveWallpaperService extends WallpaperService {
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
+
 
             ApplicationData.Load(getApplicationContext());
             drawer.init(getApplicationContext());

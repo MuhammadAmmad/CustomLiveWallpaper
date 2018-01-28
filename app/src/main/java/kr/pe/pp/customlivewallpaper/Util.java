@@ -172,7 +172,9 @@ public class Util {
         Log.d("__Debug__","resizeBitmapWithMargin - w(" + w + "), h(" + h + ")");
         bitmap = Bitmap.createScaledBitmap(bmp, w, h, true);
         if(crop != null && mode == ResizeMode.RESIZE_FIT_IMAGE) {
-            bitmap = cropBitmap(bitmap, destWidth, destHeight, crop);
+            Bitmap bitmapCrop = cropBitmap(bitmap, destWidth, destHeight, crop);
+            bitmap.recycle();
+            return bitmapCrop;
         }
         return bitmap;
     }

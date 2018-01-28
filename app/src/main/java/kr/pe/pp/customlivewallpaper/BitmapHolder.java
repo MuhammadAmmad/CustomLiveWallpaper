@@ -13,6 +13,13 @@ import java.util.ArrayList;
  */
 
 public class BitmapHolder {
+    public interface BitmapHolderEventListener {
+        void onLoadComplete();
+    }
+    private BitmapHolderEventListener bitmapHolderEventListener = null;
+    public void setBitmapHolderEventListener(BitmapHolderEventListener listener) {
+        this.bitmapHolderEventListener = listener;
+    }
 
     private Context context = null;
     private BitmapHolderMixMode mixMode = null;
@@ -25,6 +32,7 @@ public class BitmapHolder {
     private int currentIndex = 0;
     private boolean isLoading = true;
     private final BitmapHolder self = this;
+
 
     public enum BitmapHolderMixMode {
         MIXMODE_SEQUENTIAL,
@@ -80,6 +88,9 @@ public class BitmapHolder {
                     bitmap.recycle();
                 }
                 isLoading = false;
+                if(bitmapHolderEventListener != null) {
+                    bitmapHolderEventListener.onLoadComplete();
+                }
             }
         })).start();
     }

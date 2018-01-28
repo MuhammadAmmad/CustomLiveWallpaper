@@ -3,7 +3,12 @@ package kr.pe.pp.customlivewallpaper;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.util.Log;
 import android.widget.Switch;
 
@@ -34,8 +39,24 @@ public class BackgroundSwitcher {
     int switchingDelay = 7000;
     int switchingAlpha = 0;
     int switchingSpeed = 5;
+
     int switchingCurrentX = 0;
+    int switchingCurrentY = 0;
+    int switchingCurrentW = 0;
+    int switchingCurrentH = 0;
+    float switchingCurrentScale = 1.0f;
+
     int switchingNextX = 0;
+    int switchingNextY = 0;
+    int switchingNextW = 0;
+    int switchingNextH = 0;
+    float switchingNextScale = 1.0f;
+
+    Bitmap bitmapMask = null;
+    Bitmap bitmapBuffer = null;
+    Canvas canvasMask = null;
+    Canvas canvasBuffer = null;
+
     int switchingStep = 0;
 
     public BackgroundSwitcher(SwitchMode switchMode) {
@@ -54,10 +75,19 @@ public class BackgroundSwitcher {
         this.currentSwitchMode = switchMode;
         this.context = context;
         screenSize = Util.getScreenSize(context);
+        bitmapHolder.setBitmapHolderEventListener(new BitmapHolder.BitmapHolderEventListener() {
+            @Override
+            public void onLoadComplete() {
+                bitmapMask = Bitmap.createBitmap(bitmapHolder.getCurrentBitmap().getBitmap().getWidth(), bitmapHolder.getCurrentBitmap().getBitmap().getHeight(), Bitmap.Config.ARGB_8888);
+                bitmapBuffer = Bitmap.createBitmap(bitmapHolder.getCurrentBitmap().getBitmap().getWidth(), bitmapHolder.getCurrentBitmap().getBitmap().getHeight(), Bitmap.Config.ARGB_8888);
+            }
+        });
         bitmapHolder.init(context);
     }
 
     public void destroy() {
+        if(bitmapBuffer != null) bitmapBuffer.recycle();
+        if(bitmapMask != null) bitmapMask.recycle();
         bitmapHolder.destroy();
     }
 
@@ -144,9 +174,26 @@ public class BackgroundSwitcher {
                         break;
                     }
                     case Wipe: {
-                        canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
-                        isSwitching = false;
-                        bitmapHolder.next();
+                        switchingCurrentW -= switchingStep;
+                        if(switchingCurrentW <= 0) switchingCurrentW = 0;
+
+                        switchingNextX -= switchingStep / 4;
+                        if(switchingNextX <= 0) switchingNextX = 0;
+
+                        switchingCurrentX -= switchingStep / 4;
+
+                        canvas.drawBitmap(nextBitmap, nextWrapper.getLeftBase() - x + switchingNextX, nextWrapper.getTopBase() - y, null);
+
+                        int left = currentWrapper.getLeftBase() - x + switchingCurrentX;
+                        int top = currentWrapper.getTopBase() - y;
+                        Rect srcRect = new Rect(0, 0, switchingCurrentW, currentWrapper.getBitmap().getHeight());
+                        Rect destRect = new Rect(left, top, left + switchingCurrentW, top + currentWrapper.getBitmap().getHeight());
+                        canvas.drawBitmap(currentBitmap, srcRect, destRect, null);
+
+                        if(switchingNextX <= 0) {
+                            isSwitching = false;
+                            bitmapHolder.next();
+                        }
                         break;
                     }
                     case Fade: {
@@ -164,39 +211,144 @@ public class BackgroundSwitcher {
                         break;
                     }
                     case BoxIn: {
-                        canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
-                        isSwitching = false;
-                        bitmapHolder.next();
+                        switchingCurrentX += (switchingStep / 2);
+                        switchingCurrentW = currentBitmap.getWidth() - (switchingCurrentX * 2);
+                        switchingCurrentY += (int)((float)(switchingStep / 2) * ((float)screenSize.getHeight() / (float)screenSize.getWidth()));
+                        switchingCurrentH = currentBitmap.getHeight() - (switchingCurrentY * 2);
+                        int halfWidth = currentBitmap.getWidth() / 2;
+                        int halfHeight = currentBitmap.getHeight() / 2;
+                        if(switchingCurrentX >= halfWidth || switchingCurrentY >= halfHeight) {
+                            switchingCurrentW = halfWidth;
+                            switchingCurrentH = halfHeight;
+                        }
+
+                        canvas.drawBitmap(nextBitmap, nextWrapper.getLeftBase() - x, nextWrapper.getTopBase() - y, null);
+                        if(switchingCurrentX < halfWidth && switchingCurrentY < halfHeight) {
+                            int left = currentWrapper.getLeftBase() - x + switchingCurrentX;
+                            int top = currentWrapper.getTopBase() - y + switchingCurrentY;
+                            Rect srcRect = new Rect(switchingCurrentX, switchingCurrentY, switchingCurrentX + switchingCurrentW, switchingCurrentY + switchingCurrentH);
+                            Rect destRect = new Rect(left, top, left + switchingCurrentW, top + switchingCurrentH);
+                            canvas.drawBitmap(currentBitmap, srcRect, destRect, null);
+                        }
+
+                        if(switchingCurrentX >= halfWidth || switchingCurrentY >= halfHeight) {
+                            isSwitching = false;
+                            bitmapHolder.next();
+                        }
                         break;
                     }
                     case BoxOut: {
+                        switchingNextX -= (switchingStep / 2);
+                        switchingNextW = nextBitmap.getWidth() - (switchingNextX * 2);
+                        switchingNextY -= (int)((float)(switchingStep / 2) * ((float)screenSize.getHeight() / (float)screenSize.getWidth()));
+                        switchingNextH = nextBitmap.getHeight() - (switchingNextY * 2);
+                        int afterNextX = switchingNextX - (switchingStep / 2);
+                        int afterNextY = switchingNextY - (int)((float)(switchingStep / 2) * ((float)screenSize.getHeight() / (float)screenSize.getWidth()));
+
                         canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
-                        isSwitching = false;
-                        bitmapHolder.next();
+
+                        int left = nextWrapper.getLeftBase() - x + switchingNextX;
+                        int top = nextWrapper.getTopBase() - y + switchingNextY;
+                        Rect srcRect = new Rect(switchingNextX, switchingNextY, switchingNextX + switchingNextW, switchingNextY + switchingNextH);
+                        Rect destRect = new Rect(left, top, left + switchingNextW, top + switchingNextH);
+                        canvas.drawBitmap(nextBitmap, srcRect, destRect, null);
+
+                        if(afterNextX <= 0 || afterNextY <= 0) {
+                            isSwitching = false;
+                            bitmapHolder.next();
+                        }
                         break;
                     }
                     case CircleIn: {
+                        switchingNextX -= switchingStep;
+                        if(switchingNextX <= 0) switchingNextX = 0;
+
+                        // draw next image in buffer
+                        Canvas canvasBuffer = new Canvas(bitmapBuffer);
+                        canvasBuffer.drawBitmap(nextBitmap, 0, 0, null);
+
+                        // draw circle in buffer
+                        if(switchingNextX > 0) {
+                            Paint paint = new Paint();
+                            paint.setColor(Color.TRANSPARENT);
+                            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+                            canvasBuffer.drawCircle(nextBitmap.getWidth() / 2, nextBitmap.getHeight() / 2, switchingNextX, paint);
+                        }
+
                         canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
-                        isSwitching = false;
-                        bitmapHolder.next();
+                        canvas.drawBitmap(bitmapBuffer, nextWrapper.getLeftBase() - x, nextWrapper.getTopBase() - y, null);
+
+                        if(switchingNextX <= 0) {
+                            isSwitching = false;
+                            bitmapHolder.next();
+                        }
                         break;
                     }
                     case CircleOut: {
-                        canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
-                        isSwitching = false;
-                        bitmapHolder.next();
+                        switchingCurrentX += switchingStep;
+                        int finishRadius = (int)(currentBitmap.getHeight() / 1.7f);
+                        if(switchingCurrentX >= finishRadius) switchingCurrentX = finishRadius;
+
+                        canvas.drawBitmap(nextBitmap, nextWrapper.getLeftBase() - x, nextWrapper.getTopBase() - y, null);
+
+                        // draw Current image in buffer
+                        Canvas canvasBuffer = new Canvas(bitmapBuffer);
+                        canvasBuffer.drawBitmap(currentBitmap, 0, 0, null);
+
+                        // draw circle in buffer
+                        Paint paint = new Paint();
+                        paint.setColor(Color.TRANSPARENT);
+                        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+                        canvasBuffer.drawCircle(currentBitmap.getWidth() / 2, currentBitmap.getHeight() / 2, switchingCurrentX, paint);
+
+                        canvas.drawBitmap(bitmapBuffer, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
+
+                        if(switchingCurrentX >= finishRadius) {
+                            isSwitching = false;
+                            bitmapHolder.next();
+                        }
                         break;
                     }
                     case SplitIn: {
-                        canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
-                        isSwitching = false;
-                        bitmapHolder.next();
+                        switchingCurrentX += (switchingStep / 2);
+                        switchingCurrentW = currentBitmap.getWidth() - (switchingCurrentX * 2);
+                        int halfWidth = currentBitmap.getWidth() / 2;
+                        if(switchingCurrentX >= halfWidth) {
+                            switchingCurrentW = halfWidth;
+                        }
+
+                        canvas.drawBitmap(nextBitmap, nextWrapper.getLeftBase() - x, nextWrapper.getTopBase() - y, null);
+                        if(switchingCurrentX < halfWidth) {
+                            int left = currentWrapper.getLeftBase() - x + switchingCurrentX;
+                            int top = currentWrapper.getTopBase() - y;
+                            Rect srcRect = new Rect(switchingCurrentX, 0, switchingCurrentX + switchingCurrentW, currentBitmap.getHeight());
+                            Rect destRect = new Rect(left, top, left + switchingCurrentW, top + currentBitmap.getHeight());
+                            canvas.drawBitmap(currentBitmap, srcRect, destRect, null);
+                        }
+
+                        if(switchingCurrentX >= halfWidth) {
+                            isSwitching = false;
+                            bitmapHolder.next();
+                        }
                         break;
                     }
                     case SplitOut: {
+                        switchingNextX -= (switchingStep / 2);
+                        switchingNextW = nextBitmap.getWidth() - (switchingNextX * 2);
+                        int afterNextX = switchingNextX - (switchingStep / 2);
+
                         canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
-                        isSwitching = false;
-                        bitmapHolder.next();
+
+                        int left = nextWrapper.getLeftBase() - x + switchingNextX;
+                        int top = nextWrapper.getTopBase() - y;
+                        Rect srcRect = new Rect(switchingNextX, 0, switchingNextX + switchingNextW, nextBitmap.getHeight());
+                        Rect destRect = new Rect(left, top, left + switchingNextW, top + nextBitmap.getHeight());
+                        canvas.drawBitmap(nextBitmap, srcRect, destRect, null);
+
+                        if(afterNextX <= 0) {
+                            isSwitching = false;
+                            bitmapHolder.next();
+                        }
                         break;
                     }
                 }
@@ -235,7 +387,8 @@ public class BackgroundSwitcher {
                     }
                     case Wipe: {
                         switchingCurrentX = 0;
-                        switchingNextX = screenSize.getWidth();
+                        switchingCurrentW = bitmapHolder.getCurrentBitmap().getBitmap().getWidth();
+                        switchingNextX = screenSize.getWidth() / 5;
                         break;
                     }
                     case Fade: {
@@ -244,32 +397,40 @@ public class BackgroundSwitcher {
                     }
                     case BoxIn: {
                         switchingCurrentX = 0;
-                        switchingNextX = screenSize.getWidth();
+                        switchingCurrentY = 0;
+                        switchingNextX = 0;
                         break;
                     }
                     case BoxOut: {
+                        switchingNextX = bitmapHolder.getNextBitmap().getBitmap().getWidth() / 2;
+                        switchingNextY = bitmapHolder.getNextBitmap().getBitmap().getHeight() / 2;
                         switchingCurrentX = 0;
-                        switchingNextX = screenSize.getWidth();
+                        switchingCurrentY = 0;
                         break;
                     }
                     case CircleIn: {
-                        switchingCurrentX = 0;
-                        switchingNextX = screenSize.getWidth();
+                        if(screenSize.getWidth() > screenSize.getHeight()) {
+                            switchingNextX = (int)(screenSize.getWidth() / 1.7f);
+                        } else {
+                            switchingNextX = (int)(screenSize.getHeight() / 1.7f);
+                        }
                         break;
                     }
                     case CircleOut: {
                         switchingCurrentX = 0;
-                        switchingNextX = screenSize.getWidth();
                         break;
                     }
                     case SplitIn: {
                         switchingCurrentX = 0;
-                        switchingNextX = screenSize.getWidth();
+                        switchingCurrentY = 0;
+                        switchingNextX = 0;
                         break;
                     }
                     case SplitOut: {
+                        switchingNextX = bitmapHolder.getNextBitmap().getBitmap().getWidth() / 2;
+                        switchingNextY = 0;
                         switchingCurrentX = 0;
-                        switchingNextX = screenSize.getWidth();
+                        switchingCurrentY = 0;
                         break;
                     }
                 }
