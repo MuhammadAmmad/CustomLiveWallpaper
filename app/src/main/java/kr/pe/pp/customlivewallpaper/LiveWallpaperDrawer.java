@@ -26,6 +26,7 @@ import java.util.TimerTask;
 
 public class LiveWallpaperDrawer implements IDrawer {
 
+    private static int maxAngle = 80;
     private static boolean isBackground3D = true;
 
     Context context = null;
@@ -34,7 +35,7 @@ public class LiveWallpaperDrawer implements IDrawer {
 
     boolean isGetBaseAngle = false;
     AngleSensor angleSensor = null;
-    double basePitch = 0, baseRoll = 0;
+    double baseAngleX = 0, baseAngleY = 0;
     int offsetX = 0, offsetY = 0;
 
     public LiveWallpaperDrawer() {
@@ -54,6 +55,7 @@ public class LiveWallpaperDrawer implements IDrawer {
         backgroundSwitcher.init(context, switchMode);
         angleSensor = new AngleSensor(context);
         particleDrawer.init(context);
+
     }
 
     @Override
@@ -68,14 +70,7 @@ public class LiveWallpaperDrawer implements IDrawer {
         particleDrawer.active();
 
         angleSensor.register();
-        (new Handler()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                basePitch = angleSensor.pitch;
-                baseRoll = angleSensor.roll;
-                isGetBaseAngle = true;
-            }
-        }, 10);
+        isGetBaseAngle = false;
     }
 
     @Override
@@ -89,18 +84,29 @@ public class LiveWallpaperDrawer implements IDrawer {
 
     @Override
     public void update() {
-        offsetX = 0;
-        offsetY = 0;
+        //offsetX = 0;
+        //offsetY = 0;
         if(isGetBaseAngle && isBackground3D) {
-            double diffPitch = angleSensor.pitch - basePitch;
-            if (diffPitch > 90) diffPitch = 90;
-            if (diffPitch < -90) diffPitch = -90;
-            offsetX = (int) (((float) BackgroundSwitcher.margin / (float) 90) * diffPitch);
+            //Log.d("__Sensor__", "angle(" + angleSensor.angleX + ", " + angleSensor.angleY + ")");
+            if(angleSensor.angleX <= maxAngle && angleSensor.angleX >= -maxAngle
+                && angleSensor.angleY <= maxAngle && angleSensor.angleY >= -maxAngle) {
+                double diffX = angleSensor.angleX - baseAngleX;
+                offsetX = (int) (((float) BackgroundSwitcher.margin / (float) maxAngle) * diffX);
+                if(offsetX > BackgroundSwitcher.margin) offsetX = BackgroundSwitcher.margin;
+                if(offsetX < -BackgroundSwitcher.margin) offsetX = -BackgroundSwitcher.margin;
 
-            double diffRoll = angleSensor.roll - baseRoll;
-            if (diffRoll > 90) diffRoll = 90;
-            if (diffRoll < -90) diffRoll = -90;
-            offsetY = (int) (((float) BackgroundSwitcher.margin / (float) 90) * diffRoll);
+                double diffY = angleSensor.angleY - baseAngleY;
+                offsetY = (int) (((float) BackgroundSwitcher.margin / (float) maxAngle) * diffY);
+                if(offsetY > BackgroundSwitcher.margin) offsetY = BackgroundSwitcher.margin;
+                if(offsetY < -BackgroundSwitcher.margin) offsetY = -BackgroundSwitcher.margin;
+            }
+        }
+        if(!isGetBaseAngle) {
+            if(baseAngleX != angleSensor.angleX && baseAngleY != angleSensor.angleY) {
+                baseAngleX = angleSensor.angleX;
+                baseAngleY = angleSensor.angleY;
+                isGetBaseAngle = true;
+            }
         }
 
         backgroundSwitcher.update();

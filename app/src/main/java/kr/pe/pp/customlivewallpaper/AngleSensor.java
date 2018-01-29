@@ -30,7 +30,7 @@ public class AngleSensor {
     boolean gyroRunning;
     boolean accRunning;
 
-    public double pitch = 0, roll = 0;
+    public double angleX = 0, angleY = 0, angleZ = 0;
 
     public AngleSensor(Context context) {
         sensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
@@ -73,14 +73,14 @@ public class AngleSensor {
          *  mGyroValuess : 각속도 성분.
          *  mAccPitch : 가속도계를 통해 얻어낸 회전각.
          */
-        temp = (1/a) * (accPitch - pitch) + gyroValues[1];
-        pitch = pitch + (temp*dt);
+        temp = (1/a) * (accPitch - angleX) + gyroValues[1];
+        angleX = angleX + (temp*dt);
 
-        temp = (1/a) * (accRoll - roll) + gyroValues[0];
-        roll = roll + (temp*dt);
+        temp = (1/a) * (accRoll - angleY) + gyroValues[0];
+        angleY = angleY + (temp*dt);
 
         if(angleSensorEventListener != null) {
-            angleSensorEventListener.onReceiveAngle(pitch, roll);
+            angleSensorEventListener.onReceiveAngle(angleX, angleY, 0);
         }
     }
 
@@ -111,7 +111,83 @@ public class AngleSensor {
     }
 
     public interface AngleSensorEventListener {
-        void onReceiveAngle(double pitch, double roll);
+        void onReceiveAngle(double angleX, double angleY, double angleZ);
     }
 
 }
+
+/*
+public class AngleSensor {
+    private AngleSensorEventListener angleSensorEventListener = null;
+
+    SensorManager sensorManager = null;
+    SensorEventListener sensorEventListener = null;
+    Sensor sensorMagnetic = null;
+    Sensor sensorAcc = null;
+    float[] magneticValues = null;
+    float[] accValues = null;
+    float[] orientationValues = new float[3];
+    boolean running;
+    boolean magneticRunning;
+    boolean accRunning;
+
+    public double angleX = 0, angleY = 0, angleZ;
+
+    public AngleSensor(Context context) {
+        sensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
+        sensorMagnetic = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        sensorAcc = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorEventListener = new AngleSensor.GyroscopeListener();
+    }
+
+    public void register() {
+        sensorManager.registerListener(sensorEventListener, sensorMagnetic, SensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(sensorEventListener, sensorAcc, SensorManager.SENSOR_DELAY_FASTEST);
+    }
+    public void unregister() {
+        sensorManager.unregisterListener(sensorEventListener);
+    }
+
+    public void setAngleSensorEventListener(AngleSensorEventListener listener) {
+        angleSensorEventListener = listener;
+    }
+
+    private class GyroscopeListener implements SensorEventListener {
+
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            switch(event.sensor.getType()) {
+                case Sensor.TYPE_MAGNETIC_FIELD:
+                    magneticValues = event.values;
+                    break;
+                case Sensor.TYPE_ACCELEROMETER:
+                    accValues = event.values;
+                    break;
+            }
+
+            if(magneticValues != null && accValues != null) {
+                float[] R = new float[9];
+                if(SensorManager.getRotationMatrix(R, null, accValues, magneticValues)) {
+                    SensorManager.getOrientation(R, orientationValues);
+                    angleZ = Math.toDegrees(orientationValues[0]);
+                    angleY = Math.toDegrees(orientationValues[1]);
+                    angleX = Math.toDegrees(orientationValues[2]);
+                    if(angleSensorEventListener != null) {
+                        angleSensorEventListener.onReceiveAngle(angleX, angleY, angleZ);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int i) {
+
+        }
+    }
+
+    public interface AngleSensorEventListener {
+        void onReceiveAngle(double angleX, double angleY, double angleZ);
+    }
+
+}
+*/

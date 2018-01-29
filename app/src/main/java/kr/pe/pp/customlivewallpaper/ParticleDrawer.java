@@ -54,9 +54,15 @@ public class ParticleDrawer {
     public void init(Context context) {
         this.context = context;
 
+        final int particleResourceId = Util.getResourceId("drawable", ApplicationData.getEffectParticleType(), context);
+        Log.d("__Debug__", "Load Particle Resource : " + ApplicationData.getEffectParticleType() + " : " + particleResourceId);
+        if(particleResourceId <= 0) {
+            Log.d("__Debug__", "Cannot Load Particle Resource :" + ApplicationData.getEffectParticleType());
+            return;
+        }
+
         generateSpeed = (int)((10 - ApplicationData.getEffectDensity()) / 2.0f * 100.0f) + 100;   // 150 ~ 600
         final BitmapFactory.Options options = new BitmapFactory.Options();
-        final int particleResourceId = Util.getResourceId("drawable", ApplicationData.getEffectParticleType(), context);
         options.inSampleSize = 2;
         Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), particleResourceId, options);
         int size = bmp.getHeight();
