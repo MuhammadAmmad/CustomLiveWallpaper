@@ -22,13 +22,30 @@ import java.util.Map;
 
 public class CustomImageGridAdapter extends BaseAdapter {
 
-    private ArrayList<String> _ImagePathList = new ArrayList<>();
+    private ArrayList<SaveImage> _ImagePathList = new ArrayList<>();
     private Map<String, Bitmap> _Bitmaps = new HashMap<String, Bitmap>();
     private Context _Context = null;
 
-    public CustomImageGridAdapter(Context context, ArrayList<String> list) {
+    public CustomImageGridAdapter(Context context, ArrayList<SaveImage> list) {
         _Context = context;
         _ImagePathList = list;
+    }
+
+    public Bitmap getBitmap(String path) {
+        if(_Bitmaps.containsKey(path)) {
+            return _Bitmaps.get(path);
+        } else {
+            return null;
+        }
+    }
+    public boolean setBitmap(String path, Bitmap bitmap) {
+        if(_Bitmaps.containsKey(path)) {
+            _Bitmaps.remove(path);
+            _Bitmaps.put(path, bitmap);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -49,7 +66,8 @@ public class CustomImageGridAdapter extends BaseAdapter {
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
-        String filePath = _ImagePathList.get(i);
+        String filePath = _ImagePathList.get(i).getPath();
+        Integer rotate = _ImagePathList.get(i).getRotate();
         GridView gridView = (GridView)viewGroup;
 
         if(view == null) {
@@ -60,7 +78,7 @@ public class CustomImageGridAdapter extends BaseAdapter {
         if(_Bitmaps.containsKey(filePath)) {
             bmp = _Bitmaps.get(filePath);
         } else {
-            bmp = Util.createBitmapFromPath(filePath, gridView.getColumnWidth(), 160);
+            bmp = Util.createBitmapFromPath(filePath, gridView.getColumnWidth(), 160, rotate);
             _Bitmaps.put(filePath, bmp);
         }
         ((CustomImageItemView)view).setImage(bmp);

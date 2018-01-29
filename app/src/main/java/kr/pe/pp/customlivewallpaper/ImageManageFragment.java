@@ -4,6 +4,7 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -97,6 +98,37 @@ public class ImageManageFragment extends Fragment {
             }
         });
 
+        getView().findViewById(R.id.buttonRotate).setOnClickListener(new Button.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+            @Override
+            public void onClick(View view) {
+                Log.d("__Debug", "buttonRotate.onClick");
+                SparseBooleanArray positions = gridView.getCheckedItemPositions();
+                Log.d("__Debug__", "Rotate Count : " + positions.size());
+                if(positions.size() > 0) {
+                    CustomImageGridAdapter adapter = (CustomImageGridAdapter)gridView.getAdapter();
+                    for(int i = gridView.getCount()-1; i >= 0; i--) {
+                        if(positions.get(i)) {
+                            Log.d("__Debug__", "Remove Index : " + i);
+                            SaveImage saveImage = ApplicationData.getImagePathList().get(i);
+                            Integer rotate = saveImage.getRotate() + 90;
+                            if(rotate >= 360) rotate -= 360;
+                            saveImage.setRotate(rotate);
+
+                            Bitmap oldBitmap = adapter.getBitmap(saveImage.getPath());
+                            Bitmap newBitmap = Util.createBitmapFromPath(saveImage.getPath(), gridView.getColumnWidth(), 160, rotate);
+                            adapter.setBitmap(saveImage.getPath(), newBitmap);
+                            oldBitmap.recycle();
+
+                            gridView.setItemChecked(i, false);
+                        }
+                    }
+                }
+                SaveSettings();
+                RefreshControls();
+            }
+        });
+
         getView().findViewById(R.id.buttonDelete).setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -166,6 +198,8 @@ public class ImageManageFragment extends Fragment {
 
     private void RefreshControls() {
         GridView gridView = (GridView)getView().findViewById(R.id.gridImageList);
+        CustomImageGridAdapter adapter = (CustomImageGridAdapter)gridView.getAdapter();
+        adapter.notifyDataSetChanged();
         gridView.invalidateViews();
     }
 
@@ -191,7 +225,7 @@ public class ImageManageFragment extends Fragment {
         Log.d("__Debug__", "Real Path : " + realPath);
         if(!ApplicationData.getImagePathList().contains(realPath)) {
             Log.d("__Debug__", "Add Real Path : " + realPath);
-            ApplicationData.getImagePathList().add(realPath);
+            ApplicationData.getImagePathList().add(new SaveImage(realPath, 0));
         }
     }
 

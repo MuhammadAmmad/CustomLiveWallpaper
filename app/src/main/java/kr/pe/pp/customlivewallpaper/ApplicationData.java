@@ -28,7 +28,7 @@ public class ApplicationData {
         }
     }
 
-    private static ArrayList<String> _ImagePathList = new ArrayList<>();
+    private static ArrayList<SaveImage> _ImagePathList = new ArrayList<>();
 
     private static boolean isEnableSlide = true;
     private static String slideType = "";
@@ -47,7 +47,7 @@ public class ApplicationData {
     private static int effectSize = 5;
     private static int effectSizeVibrate = 3;
 
-    public static ArrayList<String> getImagePathList() {
+    public static ArrayList<SaveImage> getImagePathList() {
         return _ImagePathList;
     }
 
@@ -55,13 +55,23 @@ public class ApplicationData {
         _ImagePathList.clear();
         SharedPreferences pref = context.getSharedPreferences("ImagePathList", context.MODE_PRIVATE);
         Map<String, ?> map = pref.getAll();
+        Log.d("__Debug__", "ImagePathList count : " + map.keySet().size());
         TreeMap<String, Object> sortedMap = new TreeMap<String, Object>(map);
         Iterator<String> keys = sortedMap.keySet().iterator();
         while(keys.hasNext()) {
             String key = keys.next();
-            String path = (String)sortedMap.get(key);
-            Log.d("__Debug__", "Load - [" + key + "] = " + path);
-            _ImagePathList.add(path);
+            String value = (String)sortedMap.get(key);
+            String[] pathAndRotate = value.split("\\?\\^\\^\\?");
+            String path = "";
+            String rotate = "";
+            Integer rotateValue = 0;
+            if(pathAndRotate.length > 0) path = pathAndRotate[0];
+            if(pathAndRotate.length > 1) rotate = pathAndRotate[1];
+            if(path == null || path.isEmpty()) continue;
+            rotateValue = Integer.parseInt(rotate);
+
+            Log.d("__Debug__", "Load - [" + key + "] = Path : " + path + ", Rotate : " + rotateValue);
+            _ImagePathList.add(new SaveImage(path, rotateValue));
         }
     }
 
@@ -70,8 +80,9 @@ public class ApplicationData {
         SharedPreferences.Editor editor = pref.edit();
         editor.clear();
         for(int i=0; i<_ImagePathList.size(); i++) {
-            editor.putString(String.format("%05d", i), _ImagePathList.get(i));
-            Log.d("__Debug__", "Save - " + String.format("%05d", i) + ":" + _ImagePathList.get(i));
+            SaveImage saveImage = _ImagePathList.get(i);
+            editor.putString(String.format("%05d", i), saveImage.getPath() + "?^^?" + saveImage.getRotate());
+            Log.d("__Debug__", "Save - " + String.format("%05d", i) + ":Path(" + saveImage.getPath() + "), Rotate(" + saveImage.getRotate() + ")");
         }
         editor.commit();
     }

@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.Display;
@@ -105,20 +106,34 @@ public class Util {
         return inSampleSize;
     }
 
-    public static Bitmap createBitmapFromPath(String filePath, int width, int height) {
+    public static Bitmap createBitmapFromPath(String filePath, int width, int height, int rotate) {
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(filePath, options);
         Log.d("__Debug__", "CreateBitmapFromPath : Origin Size(" + options.outWidth + ", " + options.outHeight + ")");
         Log.d("__Debug__", "CreateBitmapFromPath : Dest Size(" + width + ", " + height + ")");
 
-        options.inSampleSize = Util.calculateInSampleSize(options, width, height);
+        boolean isRotate = (rotate == 90 || rotate == 270 ? true : false);
+        if(isRotate) {
+            options.inSampleSize = Util.calculateInSampleSize(options, height, width);
+        } else {
+            options.inSampleSize = Util.calculateInSampleSize(options, width, height);
+        }
         Log.d("__Debug__", "CreateBitmapFromPath : SampleSize(" + options.inSampleSize + ")");
 
         options.inJustDecodeBounds = false;
         Bitmap bmp = BitmapFactory.decodeFile(filePath, options);
         Log.d("__Debug__", "CreateBitmapFromPath : Result Size(" + bmp.getWidth() + ", " + bmp.getHeight() + ")");
-        return bmp;
+        if(isRotate) {
+            Matrix matrix = new Matrix();
+            matrix.reset();
+            matrix.setRotate(rotate);
+            Bitmap bmpRotate = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
+            bmp.recycle();
+            return bmpRotate;
+        } else {
+            return bmp;
+        }
     }
 
     public static Bitmap resizeBitmapWithMargin(Bitmap bmp, int width, int height) {

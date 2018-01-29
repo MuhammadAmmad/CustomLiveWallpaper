@@ -26,7 +26,7 @@ public class BitmapHolder {
     private BitmapWrapper current = null;
     private BitmapWrapper next = null;
     private BitmapWrapper afternext = null;
-    private ArrayList<String> pathList = new ArrayList<>();
+    private ArrayList<SaveImage> pathList = new ArrayList<>();
     private int imageMargin = 0;
     private Util.Size screenSize = null;
     private int currentIndex = 0;
@@ -53,7 +53,7 @@ public class BitmapHolder {
         screenSize = Util.getScreenSize(context);
 
         pathList.clear();
-        for(String path : ApplicationData.getImagePathList()) { pathList.add(path); }
+        for(SaveImage path : ApplicationData.getImagePathList()) { pathList.add(path); }
 
         if(this.mixMode == BitmapHolderMixMode.MIXMODE_RANDOM) {
             ShakePathList();
@@ -64,7 +64,7 @@ public class BitmapHolder {
             public void run() {
                 // load current image
                 if(pathList.size() > 0) {
-                    Bitmap bitmap = Util.createBitmapFromPath(pathList.get(currentIndex), screenSize.getWidth(), screenSize.getHeight());
+                    Bitmap bitmap = Util.createBitmapFromPath(pathList.get(currentIndex).getPath(), screenSize.getWidth(), screenSize.getHeight(), pathList.get(currentIndex).getRotate());
                     Bitmap bmp = Util.resizeBitmapWithMargin(bitmap, screenSize.getWidth(), screenSize.getHeight(), Util.ResizeMode.RESIZE_FIT_IMAGE, imageMargin, Util.CropMode.CROP_CENTER);
                     current = new BitmapWrapper(self.context, bmp);
                     bitmap.recycle();
@@ -73,7 +73,7 @@ public class BitmapHolder {
                 // load next image
                 if(pathList.size() > 1) {
                     currentIndex++;
-                    Bitmap bitmap = Util.createBitmapFromPath(pathList.get(currentIndex), screenSize.getWidth(), screenSize.getHeight());
+                    Bitmap bitmap = Util.createBitmapFromPath(pathList.get(currentIndex).getPath(), screenSize.getWidth(), screenSize.getHeight(), pathList.get(currentIndex).getRotate());
                     Bitmap bmp = Util.resizeBitmapWithMargin(bitmap, screenSize.getWidth(), screenSize.getHeight(), Util.ResizeMode.RESIZE_FIT_IMAGE, imageMargin, Util.CropMode.CROP_CENTER);
                     next = new BitmapWrapper(self.context, bmp);
                     bitmap.recycle();
@@ -82,7 +82,7 @@ public class BitmapHolder {
                 // load afternext image
                 if(pathList.size() > 2) {
                     currentIndex++;
-                    Bitmap bitmap = Util.createBitmapFromPath(pathList.get(currentIndex), screenSize.getWidth(), screenSize.getHeight());
+                    Bitmap bitmap = Util.createBitmapFromPath(pathList.get(currentIndex).getPath(), screenSize.getWidth(), screenSize.getHeight(), pathList.get(currentIndex).getRotate());
                     Bitmap bmp = Util.resizeBitmapWithMargin(bitmap, screenSize.getWidth(), screenSize.getHeight(), Util.ResizeMode.RESIZE_FIT_IMAGE, imageMargin, Util.CropMode.CROP_CENTER);
                     afternext = new BitmapWrapper(self.context, bmp);
                     bitmap.recycle();
@@ -135,7 +135,7 @@ public class BitmapHolder {
             (new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    Bitmap bmp = Util.createBitmapFromPath(pathList.get(currentIndex), screenSize.getWidth(), screenSize.getHeight());
+                    Bitmap bmp = Util.createBitmapFromPath(pathList.get(currentIndex).getPath(), screenSize.getWidth(), screenSize.getHeight(), pathList.get(currentIndex).getRotate());
                     bmp = Util.resizeBitmapWithMargin(bmp, screenSize.getWidth(), screenSize.getHeight(), Util.ResizeMode.RESIZE_FIT_IMAGE, imageMargin, Util.CropMode.CROP_CENTER);
                     self.afternext = new BitmapWrapper(self.context, bmp);
                     self.isLoading = false;
