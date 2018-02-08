@@ -103,6 +103,7 @@ public class BackgroundSwitcher {
                 switchMode = SwitchMode.valueOf(ApplicationData.getSlideType());
             } catch(IllegalArgumentException ex) { }
             if(switchMode == null) switchMode = SwitchMode.Cover;
+            currentSwitchMode = switchMode;
         }
 
         if(ApplicationData.getIsEnableSlide()) {

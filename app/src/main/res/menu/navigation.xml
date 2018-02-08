@@ -16,4 +16,9 @@
         android:icon="@drawable/ic_preview_24dp"
         android:title="@string/title_preview" />
 
+    <item
+        android:id="@+id/navigation_stop"
+        android:icon="@drawable/ic_stop_24dp"
+        android:title="@string/title_stop" />
+
 </menu>

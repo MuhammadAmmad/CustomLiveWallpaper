@@ -19,6 +19,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,27 +39,10 @@ public class HomeActivity extends AppCompatActivity implements ImageManageFragme
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_image_manage:
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, imageManageFragment).commit();
                     return true;
                 case R.id.navigation_effect:
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, effectFragment).commit();
                     return true;
                 case R.id.navigation_preview: {
-                    /*
-                    if(!Util.isServiceRunning(getApplicationContext(), "kr.pe.pp.customlivewallpaper.LiveWallpaperService")) {
-                        Log.d("__ServiceTest__", "Service is not running...");
-                        Intent intent = new Intent(getApplicationContext(), LiveWallpaperService.class);
-                        startService(intent);
-                    } else {
-                        Log.d("__ServiceTest__", "Service is running...");
-                    }
-                    */
-
-                    Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
-                    intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                            new ComponentName(getBaseContext(), LiveWallpaperService.class));
-                    startActivityForResult(intent, Consts.WALLPAPER_CHANGED);
-                    return true;
                 }
             }
             return false;
@@ -140,8 +124,43 @@ public class HomeActivity extends AppCompatActivity implements ImageManageFragme
         effectFragment = new EffectFragment();
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, imageManageFragment).commit();
 
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        TextView textImageManage = (TextView)findViewById(R.id.text_image_manage);
+        textImageManage.setOnClickListener(new TextView.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, imageManageFragment).commit();
+            }
+        });
+
+        TextView textEffect = (TextView)findViewById(R.id.text_effect);
+        textEffect.setOnClickListener(new TextView.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, effectFragment).commit();
+            }
+        });
+
+        TextView textPreview = (TextView)findViewById(R.id.text_preview);
+        textPreview.setOnClickListener(new TextView.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
+                intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+                        new ComponentName(getBaseContext(), LiveWallpaperService.class));
+                startActivityForResult(intent, Consts.WALLPAPER_CHANGED);
+            }
+        });
+
+        TextView textStop = (TextView)findViewById(R.id.text_stop);
+        textStop.setOnClickListener(new TextView.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(Util.isServiceRunning(getApplicationContext(), "kr.pe.pp.customlivewallpaper.LiveWallpaperService")) {
+                    Intent intent = new Intent(getApplicationContext(), LiveWallpaperService.class);
+                    stopService(intent);
+                }
+            }
+        });
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
