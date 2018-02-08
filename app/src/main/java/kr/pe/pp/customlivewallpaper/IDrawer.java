@@ -11,7 +11,7 @@ public interface IDrawer {
     void init(Context context);
     void draw(Canvas canvas);
     void destroy();
-    void active();
+    void active(boolean isChangeSettings);
     void deactive();
     void update();
 }

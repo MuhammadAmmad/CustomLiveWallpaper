@@ -45,7 +45,7 @@ public class ApplicationData {
     private static int effectMoveSpeed = 5;
     private static int effectMoveVibrate = 3;
     private static int effectSize = 5;
-    private static int effectSizeVibrate = 3;
+    private static int effectSizeVibrate = 0;
 
     public static ArrayList<SaveImage> getImagePathList() {
         return _ImagePathList;
@@ -123,21 +123,21 @@ public class ApplicationData {
         SharedPreferences pref = context.getSharedPreferences("Effects", context.MODE_PRIVATE);
 
         isEnableSlide = pref.getBoolean("isEnableSlide", true);
-        slideType = pref.getString("slideType", "");;
+        slideType = pref.getString("slideType", "SplitOut");;
         slideSpeed = pref.getInt("slideSpeed", 4);
         slideDelay = pref.getInt("slideDelay", 5);
 
         isEnableEffect = pref.getBoolean("isEnableEffect", true);
-        effectParticleType = pref.getString("effectParticleType", "");
+        effectParticleType = pref.getString("effectParticleType", "particle_bubble");
         effectDensity = pref.getInt("effectDensity", 5);
-        effectIsUseRotate = pref.getBoolean("effectIsUseRotate", true);
+        effectIsUseRotate = pref.getBoolean("effectIsUseRotate", false);
         effectIsRotateRight = pref.getBoolean("effectIsRotateRight", true);
         effectRotateSpeed = pref.getInt("effectRotateSpeed", 5);
         effectMoveDirection = MoveDirection.values()[pref.getInt("effectMoveDirection", MoveDirection.DOWN.getValue())];
-        effectMoveSpeed = pref.getInt("effectMoveSpeed", 5);
+        effectMoveSpeed = pref.getInt("effectMoveSpeed", 3);
         effectMoveVibrate = pref.getInt("effectMoveVibrate", 3);
         effectSize = pref.getInt("effectSize", 5);
-        effectSizeVibrate = pref.getInt("effectSizeVibrate", 3);
+        effectSizeVibrate = pref.getInt("effectSizeVibrate", 0);
     }
 
     public static void SaveEffects(Context context) {

@@ -1,5 +1,8 @@
 package kr.pe.pp.customlivewallpaper;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.os.Handler;
@@ -11,6 +14,8 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 
 import java.util.ArrayList;
+import java.util.prefs.PreferenceChangeEvent;
+import java.util.prefs.PreferenceChangeListener;
 
 /**
  * Created by Administrator on 2018-01-17.
@@ -18,16 +23,16 @@ import java.util.ArrayList;
 
 public class LiveWallpaperService extends WallpaperService {
 
-    private IDrawer drawer = new LiveWallpaperDrawer();
-
     @Override
     public Engine onCreateEngine() {
         return new LiveWallpaperEngine();
     }
 
-    private class LiveWallpaperEngine extends Engine {
+    private class LiveWallpaperEngine extends Engine implements SharedPreferences.OnSharedPreferenceChangeListener {
+        private IDrawer drawer = new LiveWallpaperDrawer();
         private boolean visible = false;
         private boolean isDraw = true;
+        private boolean isChangeSettings = false;
         private final Handler handler = new Handler();
         private final Runnable drawRunner = new Runnable() {
             @Override
@@ -90,39 +95,60 @@ public class LiveWallpaperService extends WallpaperService {
         private AnimationRunnable animationLoop = null;
         private Thread animationThread = null;
 
+        public LiveWallpaperEngine() {
+            super();
+            Log.d("LiveWallpaperService", "LiveWallpaperEngine::Creator - " + System.identityHashCode(this));
+        }
+
         @Override
         public void onCreate(SurfaceHolder surfaceHolder) {
             super.onCreate(surfaceHolder);
 
+            SharedPreferences prefImagePathList = getSharedPreferences("ImagePathList", Context.MODE_PRIVATE);
+            prefImagePathList.registerOnSharedPreferenceChangeListener(this);
+            SharedPreferences prefEffects = getSharedPreferences("Effects", Context.MODE_PRIVATE);
+            prefEffects.registerOnSharedPreferenceChangeListener(this);
 
             ApplicationData.Load(getApplicationContext());
             drawer.init(getApplicationContext());
-            Log.d("LiveWallpaperService", "LiveWallpaperEngine::onCreate");
+            Log.d("LiveWallpaperService", "LiveWallpaperEngine::onCreate isPreview(" + isPreview() + ") - " + System.identityHashCode(this));
+        }
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+            isChangeSettings = true;
         }
 
         @Override
         public void onDestroy() {
             super.onDestroy();
-            Log.d("LiveWallpaperService", "LiveWallpaperEngine::onDestroy");
+            drawer.destroy();
+            Log.d("LiveWallpaperService", "LiveWallpaperEngine::onDestroy isPreview(" + isPreview() + ") - " + System.identityHashCode(this));
         }
 
         @Override
         public void onSurfaceCreated(SurfaceHolder holder) {
             super.onSurfaceCreated(holder);
-            Log.d("LiveWallpaperService", "LiveWallpaperEngine::onSurfaceCreated");
+            Log.d("LiveWallpaperService", "LiveWallpaperEngine::onSurfaceCreated isPreview(" + isPreview() + ") - " + System.identityHashCode(this));
         }
 
         @Override
         public void onSurfaceDestroyed(SurfaceHolder holder) {
             super.onSurfaceDestroyed(holder);
-            Log.d("LiveWallpaperService", "LiveWallpaperEngine::onSurfaceDestroyed");
+            Log.d("LiveWallpaperService", "LiveWallpaperEngine::onSurfaceDestroyed isPreview(" + isPreview() + ") - " + System.identityHashCode(this));
         }
 
         @Override
         public void onVisibilityChanged(boolean visible) {
+            Log.d("LiveWallpaperService", "LiveWallpaperEngine::onVisibilityChanged(" + visible + ") isPreview(" + isPreview() + ") - " + System.identityHashCode(this));
             this.visible = visible;
             if (visible) {
-                drawer.active();
+                if(isChangeSettings) {
+                    ApplicationData.Load(getApplicationContext());
+                }
+                drawer.active(isChangeSettings);
+                isChangeSettings = false;
+
                 updateRunner.run();
                 drawRunner.run();
                 animationLoop = new AnimationRunnable();

@@ -1,5 +1,7 @@
 package kr.pe.pp.customlivewallpaper;
 
+import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -270,5 +272,16 @@ public class Util {
             e.printStackTrace();
             return -1;
         }
+    }
+
+    public static boolean isServiceRunning(Context context, String serviceName) {
+        ActivityManager manager = (ActivityManager) context.getSystemService(Activity.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            //Log.d("__ServiceList__", service.service.getClassName());
+            if (serviceName.equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

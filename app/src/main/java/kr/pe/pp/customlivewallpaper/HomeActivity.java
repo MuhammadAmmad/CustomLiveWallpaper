@@ -1,6 +1,7 @@
 package kr.pe.pp.customlivewallpaper;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.WallpaperManager;
@@ -20,6 +21,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -42,6 +44,16 @@ public class HomeActivity extends AppCompatActivity implements ImageManageFragme
                     getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, effectFragment).commit();
                     return true;
                 case R.id.navigation_preview: {
+                    /*
+                    if(!Util.isServiceRunning(getApplicationContext(), "kr.pe.pp.customlivewallpaper.LiveWallpaperService")) {
+                        Log.d("__ServiceTest__", "Service is not running...");
+                        Intent intent = new Intent(getApplicationContext(), LiveWallpaperService.class);
+                        startService(intent);
+                    } else {
+                        Log.d("__ServiceTest__", "Service is running...");
+                    }
+                    */
+
                     Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
                     intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
                             new ComponentName(getBaseContext(), LiveWallpaperService.class));
@@ -65,6 +77,7 @@ public class HomeActivity extends AppCompatActivity implements ImageManageFragme
         } else {
             startApplication();
         }
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)

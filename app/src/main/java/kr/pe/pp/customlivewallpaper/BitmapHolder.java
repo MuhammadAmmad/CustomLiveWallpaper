@@ -59,6 +59,7 @@ public class BitmapHolder {
             ShakePathList();
         }
 
+        currentIndex = 0;
         (new Thread(new Runnable() {
             @Override
             public void run() {
@@ -98,12 +99,15 @@ public class BitmapHolder {
     public void destroy() {
         if(afternext != null) {
             afternext.getBitmap().recycle();
+            afternext = null;
         }
         if(next != null) {
             next.getBitmap().recycle();
+            next = null;
         }
         if(current != null) {
             current.getBitmap().recycle();
+            current = null;
         }
     }
 

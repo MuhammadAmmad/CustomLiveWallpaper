@@ -7,4 +7,6 @@
     <color name="effectScreenLine">#dedede</color>
     <color name="effectScreenTab">#c0dcff</color>
     <color name="effectScreenTabUnderline">#94b9ff</color>
+    <color name="colorGreenLight">#f6fff2</color>
+    <color name="colorGreenDark">#9bda86</color>
 </resources>

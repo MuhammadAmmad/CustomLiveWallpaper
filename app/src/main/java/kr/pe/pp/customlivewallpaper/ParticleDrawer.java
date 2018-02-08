@@ -51,17 +51,16 @@ public class ParticleDrawer {
     private Queue<Particle> removeQueue = new LinkedList<Particle>();
     private Queue<Particle> addQueue = new LinkedList<Particle>();
 
-    public void init(Context context) {
-        this.context = context;
+    private ArrayList<Bitmap> LoadParticleBitmapsFromSetting() {
+        ArrayList<Bitmap> result = new ArrayList<Bitmap>();
 
         final int particleResourceId = Util.getResourceId("drawable", ApplicationData.getEffectParticleType(), context);
         Log.d("__Debug__", "Load Particle Resource : " + ApplicationData.getEffectParticleType() + " : " + particleResourceId);
         if(particleResourceId <= 0) {
             Log.d("__Debug__", "Cannot Load Particle Resource :" + ApplicationData.getEffectParticleType());
-            return;
+            return null;
         }
 
-        generateSpeed = (int)((10 - ApplicationData.getEffectDensity()) / 2.0f * 100.0f) + 100;   // 150 ~ 600
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 2;
         Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), particleResourceId, options);
@@ -69,20 +68,52 @@ public class ParticleDrawer {
         int count = (int)(bmp.getWidth() / size);
         Log.d("__Debug__", "Particle Count : " + count + ", " + bmp.getWidth() + " / " + size);
         if(count == 1) {
-            bitmapParticles.add(bmp);
+            result.add(bmp);
         } else {
             for (int i = 0; i < count; i++) {
                 Bitmap tmp = Bitmap.createBitmap(bmp, i * size, 0, size, size);
-                bitmapParticles.add(tmp);
+                result.add(tmp);
             }
             bmp.recycle();
         }
+        return result;
+    }
+
+    public void init(Context context) {
+        this.context = context;
+        bitmapParticles = LoadParticleBitmapsFromSetting();
+        generateSpeed = (int)((10 - ApplicationData.getEffectDensity()) / 2.0f * 100.0f) + 100;   // 150 ~ 600
     }
 
     public void destroy() {
+        Particle particle = removeQueue.poll();
+        while(particle != null) {
+            particle.destroy();
+            particle = removeQueue.poll();
+        }
+
+        particle = addQueue.poll();
+        while(particle != null) {
+            particle.destroy();
+            particle = addQueue.poll();
+        }
+
+        for(Particle p : particles) {
+            p.destroy();
+        }
+        particles.clear();
+
+        for(Bitmap bmp : bitmapParticles) {
+            bmp.recycle();
+        }
+        bitmapParticles.clear();
     }
 
-    public void active() {
+    public void active(boolean isChangeSettings) {
+        if(isChangeSettings) {
+            bitmapParticles = LoadParticleBitmapsFromSetting();
+            generateSpeed = (int)((10 - ApplicationData.getEffectDensity()) / 2.0f * 100.0f) + 100;   // 150 ~ 600
+        }
         timerGeneratorStarted = true;
         timerGeneratorTick = 0;
         timerGeneratorFinishTick = (int)(generateSpeed / 1000.0f * 60.0f);
@@ -111,6 +142,7 @@ public class ParticleDrawer {
 
         Particle particle = removeQueue.poll();
         if(particle != null) {
+            particle.destroy();
             particles.remove(particle);
         }
 

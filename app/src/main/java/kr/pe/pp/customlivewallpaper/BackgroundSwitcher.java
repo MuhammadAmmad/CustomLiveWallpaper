@@ -87,11 +87,24 @@ public class BackgroundSwitcher {
 
     public void destroy() {
         if(bitmapBuffer != null) bitmapBuffer.recycle();
+        bitmapBuffer = null;
+
         if(bitmapMask != null) bitmapMask.recycle();
+        bitmapMask = null;
+
         bitmapHolder.destroy();
     }
 
-    public void active() {
+    public void active(boolean isChangeSettings) {
+        if(isChangeSettings) {
+            this.switchingSpeed = ApplicationData.getSlideSpeed() + 1;
+            this.switchingDelay = (ApplicationData.getSlideDelay() + 3) * 1000;
+            try {
+                switchMode = SwitchMode.valueOf(ApplicationData.getSlideType());
+            } catch(IllegalArgumentException ex) { }
+            if(switchMode == null) switchMode = SwitchMode.Cover;
+        }
+
         if(ApplicationData.getIsEnableSlide()) {
             timerTaskSwitcher = new BackgroundSwitcher.SwitcherTimerTask();
             timerIsStarted = true;

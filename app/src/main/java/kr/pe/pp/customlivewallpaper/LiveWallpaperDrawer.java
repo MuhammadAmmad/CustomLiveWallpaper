@@ -65,9 +65,9 @@ public class LiveWallpaperDrawer implements IDrawer {
     }
 
     @Override
-    public void active() {
-        backgroundSwitcher.active();
-        particleDrawer.active();
+    public void active(boolean isChangeSettings) {
+        backgroundSwitcher.active(isChangeSettings);
+        particleDrawer.active(isChangeSettings);
 
         angleSensor.register();
         isGetBaseAngle = false;
