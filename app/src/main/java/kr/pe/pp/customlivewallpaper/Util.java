@@ -2,6 +2,8 @@ package kr.pe.pp.customlivewallpaper;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.WallpaperInfo;
+import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -279,9 +281,22 @@ public class Util {
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
             //Log.d("__ServiceList__", service.service.getClassName());
             if (serviceName.equals(service.service.getClassName())) {
+                Log.d("__IsServiceRunning__", serviceName + " - running");
                 return true;
             }
         }
+        Log.d("__IsServiceRunning__", serviceName + " - not running");
         return false;
+    }
+
+    public static boolean isRunningWallpaper(Context context) {
+        WallpaperManager wpm = WallpaperManager.getInstance(context);
+        WallpaperInfo info = wpm.getWallpaperInfo();
+
+        if(info != null && info.getPackageName().equals(context.getPackageName())) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

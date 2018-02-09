@@ -10,8 +10,8 @@
     <string name="title_activity_home">라이브 배경화면 설정</string>
     <string name="title_image_manage">이미지</string>
     <string name="title_effect">효과</string>
-    <string name="title_preview">미리보기</string>
-    <string name="title_stop">중지</string>
+    <string name="title_preview">적용</string>
+    <string name="title_stop">해제</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

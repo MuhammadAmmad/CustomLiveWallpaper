@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.content.ComponentName;
 import android.content.DialogInterface;
@@ -24,6 +25,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class HomeActivity extends AppCompatActivity implements ImageManageFragment.ImageManageFragmentListener, EffectFragment.OnFragmentInteractionListener {
@@ -31,23 +33,6 @@ public class HomeActivity extends AppCompatActivity implements ImageManageFragme
 
     private ImageManageFragment imageManageFragment;
     private EffectFragment effectFragment;
-
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
-
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.navigation_image_manage:
-                    return true;
-                case R.id.navigation_effect:
-                    return true;
-                case R.id.navigation_preview: {
-                }
-            }
-            return false;
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -155,15 +140,20 @@ public class HomeActivity extends AppCompatActivity implements ImageManageFragme
         textStop.setOnClickListener(new TextView.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(Util.isServiceRunning(getApplicationContext(), "kr.pe.pp.customlivewallpaper.LiveWallpaperService")) {
-                    Intent intent = new Intent(getApplicationContext(), LiveWallpaperService.class);
-                    stopService(intent);
+                WallpaperManager manager = WallpaperManager.getInstance(getApplicationContext());
+                WallpaperInfo info = manager.getWallpaperInfo();
+                if(info != null && info.getPackageName().equals(getApplicationContext().getPackageName())) {
+                    try {
+                        manager.clear();
+                        Toast.makeText(getApplicationContext(), "지정된 배경화면을 해제 하였습니다.", Toast.LENGTH_LONG).show();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d("__Debug", "onActivityResult");
@@ -174,6 +164,7 @@ public class HomeActivity extends AppCompatActivity implements ImageManageFragme
         Log.d("__Debug", "onActivityResult : requestCode = " + requestCode);
         switch(requestCode) {
             case Consts.WALLPAPER_CHANGED:
+                Toast.makeText(getApplicationContext(), "배경화면이 적용되었습니다.", Toast.LENGTH_LONG).show();
                 //onResultWallpaperChanged(data);
                 break;
 
@@ -188,6 +179,7 @@ public class HomeActivity extends AppCompatActivity implements ImageManageFragme
             case Consts.CROP_FROM_CAMERA:
                 //onResultCropFromCamera(data);
                 break;
+
         }
     }
 
