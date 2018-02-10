@@ -81,13 +81,13 @@ public class HomeActivity extends AppCompatActivity implements ImageManageFragme
                     if (grantResults[i] == PackageManager.PERMISSION_DENIED)
                     {
                         // 하나라도 거부한다면.
-                        new AlertDialog.Builder(this).setTitle("알림").setMessage("권한을 허용해주셔야 앱을 이용할 수 있습니다.")
-                                .setPositiveButton("종료", new DialogInterface.OnClickListener() {
+                        new AlertDialog.Builder(this).setTitle(R.string.message_alert).setMessage(R.string.message_must_appr_permit)
+                                .setPositiveButton(R.string.message_exit, new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
                                         dialog.dismiss();
                                         _HomeActivity.finish();
                                     }
-                                }).setNegativeButton("권한 설정", new DialogInterface.OnClickListener() {
+                                }).setNegativeButton(R.string.set_permission, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
                                 Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
@@ -145,7 +145,7 @@ public class HomeActivity extends AppCompatActivity implements ImageManageFragme
                 if(info != null && info.getPackageName().equals(getApplicationContext().getPackageName())) {
                     try {
                         manager.clear();
-                        Toast.makeText(getApplicationContext(), "지정된 배경화면을 해제 하였습니다.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), R.string.message_clear_wallpaper, Toast.LENGTH_LONG).show();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -164,7 +164,7 @@ public class HomeActivity extends AppCompatActivity implements ImageManageFragme
         Log.d("__Debug", "onActivityResult : requestCode = " + requestCode);
         switch(requestCode) {
             case Consts.WALLPAPER_CHANGED:
-                Toast.makeText(getApplicationContext(), "배경화면이 적용되었습니다.", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), R.string.message_apply_wallpaper, Toast.LENGTH_LONG).show();
                 //onResultWallpaperChanged(data);
                 break;
 

@@ -29,8 +29,7 @@
         android:layout_marginStart="4dp"
         android:layout_marginTop="4dp"
         android:background="@drawable/ic_check_black_100dp"
-        android:backgroundTint="#aacc00"
         android:scaleType="fitXY"
-        android:visibility="gone" />
+        android:visibility="visible" />
 
 </FrameLayout>

@@ -24,4 +24,10 @@
         <b>고사양모드</b>\n
         <i>고사양모드 입니다.</i>
     </string>
+    <string name="message_clear_wallpaper">지정된 배경화면을 해제 하였습니다.</string>
+    <string name="message_apply_wallpaper">배경화면이 적용되었습니다.</string>
+    <string name="message_alert">알림</string>
+    <string name="message_must_appr_permit">권한을 허용해주셔야 앱을 이용할 수 있습니다.</string>
+    <string name="message_exit">종료</string>
+    <string name="set_permission">권한 설정</string>
 </resources>
