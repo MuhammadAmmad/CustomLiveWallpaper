@@ -104,6 +104,13 @@ public class HomeActivity extends AppCompatActivity implements ImageManageFragme
         }
     }
 
+    private void showPreview() {
+        Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
+        intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+                new ComponentName(getBaseContext(), LiveWallpaperService.class));
+        startActivityForResult(intent, Consts.WALLPAPER_CHANGED);
+    }
+
     private void startApplication() {
         imageManageFragment = new ImageManageFragment();
         effectFragment = new EffectFragment();
@@ -129,10 +136,38 @@ public class HomeActivity extends AppCompatActivity implements ImageManageFragme
         textPreview.setOnClickListener(new TextView.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
-                intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                        new ComponentName(getBaseContext(), LiveWallpaperService.class));
-                startActivityForResult(intent, Consts.WALLPAPER_CHANGED);
+                /*
+                final WallpaperManager manager = WallpaperManager.getInstance(getApplicationContext());
+                WallpaperInfo info = manager.getWallpaperInfo();
+                if(info != null && info.getPackageName().equals(getApplicationContext().getPackageName())) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
+                    builder.setMessage("라이브 배경화면이 실행중입니다.\n변경사항이 모두 반영되길 원하시면 기존 배경화면을 중지후 재시작 하여야합니다.\n중지후 미리보기를 실행하시겠습니까?")
+                            .setPositiveButton("예", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    try {
+                                        manager.clear();
+                                        Toast.makeText(getApplicationContext(), R.string.message_clear_wallpaper, Toast.LENGTH_LONG).show();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+
+                                    showPreview();
+                                }
+                            })
+                            .setNegativeButton("아니오", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    showPreview();
+                                }
+                            });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                } else {
+                    showPreview();
+                }
+                */
+                showPreview();
             }
         });
 
