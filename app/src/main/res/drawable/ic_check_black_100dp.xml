@@ -1,9 +1,16 @@
-<vector android:alpha="0.83" android:height="100dp"
+<vector android:alpha="0.9"
     android:viewportHeight="24.0" android:viewportWidth="24.0"
-    android:width="100dp" xmlns:android="http://schemas.android.com/apk/res/android">
-    <path android:fillColor="#ffa672"
-        android:strokeWidth="0.5"
-        android:strokeLineJoin="round"
-        android:strokeColor="#FFFF1213"
-        android:pathData="M9,16.17L4.83,12l-1.42,1.41L9,19 21,7l-1.41,-1.41z"/>
+    android:width="100dp" android:height="100dp" xmlns:android="http://schemas.android.com/apk/res/android">
+    <group>
+        <path android:fillColor="#5c98ff"
+            android:strokeWidth="1"
+            android:strokeLineJoin="round"
+            android:strokeColor="#FFFFFF"
+            android:pathData="
+            M9,15.17
+            L2.83,9
+            l-2.42,2.41
+            L9,20 23,6
+            l-2.41,-2.41z"/>
+    </group>
 </vector>

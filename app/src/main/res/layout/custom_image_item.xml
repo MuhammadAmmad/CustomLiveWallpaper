@@ -30,6 +30,6 @@
         android:layout_marginTop="4dp"
         android:background="@drawable/ic_check_black_100dp"
         android:scaleType="fitXY"
-        android:visibility="visible" />
+        android:visibility="gone" />
 
 </FrameLayout>
