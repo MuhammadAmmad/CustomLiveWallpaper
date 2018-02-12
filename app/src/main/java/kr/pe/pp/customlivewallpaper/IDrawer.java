@@ -2,6 +2,7 @@ package kr.pe.pp.customlivewallpaper;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.view.MotionEvent;
 
 /**
  * Created by Administrator on 2018-01-23.
@@ -14,4 +15,5 @@ public interface IDrawer {
     void active(boolean isChangeSettings);
     void deactive();
     void update();
+    void onTouchEvent(MotionEvent event);
 }

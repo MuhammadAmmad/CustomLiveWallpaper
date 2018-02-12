@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.MotionEvent;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +22,16 @@ import java.util.TimerTask;
  */
 
 public class ParticleDrawer {
+
+    public void onTouchEvent(MotionEvent event) {
+        try {
+            for (Particle particle : particles) {
+                if(particle.getRect().intersect((int)event.getX() - 20, (int)event.getY() - 20, (int)event.getX() + 20, (int)event.getY() + 20)) {
+                    removeQueue.add(particle);
+                }
+            }
+        } catch(Exception ex) { }
+    }
 
     private class GenerateTimerTask implements Runnable {
         @Override

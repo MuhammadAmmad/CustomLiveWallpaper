@@ -77,9 +77,11 @@ public class BackgroundSwitcher {
         screenSize = Util.getScreenSize(context);
         bitmapHolder.setBitmapHolderEventListener(new BitmapHolder.BitmapHolderEventListener() {
             @Override
-            public void onLoadComplete() {
-                bitmapMask = Bitmap.createBitmap(bitmapHolder.getCurrentBitmap().getBitmap().getWidth(), bitmapHolder.getCurrentBitmap().getBitmap().getHeight(), Bitmap.Config.ARGB_8888);
-                bitmapBuffer = Bitmap.createBitmap(bitmapHolder.getCurrentBitmap().getBitmap().getWidth(), bitmapHolder.getCurrentBitmap().getBitmap().getHeight(), Bitmap.Config.ARGB_8888);
+            public void onLoadComplete(boolean isInit) {
+                if(isInit) {
+                    bitmapMask = Bitmap.createBitmap(bitmapHolder.getCurrentBitmap().getBitmap().getWidth(), bitmapHolder.getCurrentBitmap().getBitmap().getHeight(), Bitmap.Config.ARGB_8888);
+                    bitmapBuffer = Bitmap.createBitmap(bitmapHolder.getCurrentBitmap().getBitmap().getWidth(), bitmapHolder.getCurrentBitmap().getBitmap().getHeight(), Bitmap.Config.ARGB_8888);
+                }
             }
         });
         bitmapHolder.init(context);
@@ -97,6 +99,8 @@ public class BackgroundSwitcher {
 
     public void active(boolean isChangeSettings) {
         if(isChangeSettings) {
+            bitmapHolder.active(isChangeSettings);
+
             this.switchingSpeed = ApplicationData.getSlideSpeed() + 1;
             this.switchingDelay = (ApplicationData.getSlideDelay() + 3) * 1000;
             try {
@@ -118,6 +122,8 @@ public class BackgroundSwitcher {
         timerIsStarted = false;
         timerTick = 0;
         timerFinishTick = (int)(switchingDelay / 1000.0f * 60.0f);
+
+        bitmapHolder.deactive();
     }
 
     private void timerCheck() {
@@ -369,6 +375,11 @@ public class BackgroundSwitcher {
             } else {
                 canvas.drawBitmap(currentBitmap, currentWrapper.getLeftBase() - x, currentWrapper.getTopBase() - y, null);
             }
+        } else {
+            Paint paint = new Paint();
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(Color.BLACK);
+            canvas.drawRect(screenSize.toRect(), paint);
         }
     }
 

@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -160,6 +161,12 @@ public class LiveWallpaperService extends WallpaperService {
                 drawer.deactive();
             }
             super.onVisibilityChanged(visible);
+        }
+
+        @Override
+        public void onTouchEvent(MotionEvent event) {
+            //super.onTouchEvent(event);
+            drawer.onTouchEvent(event);
         }
     }
 

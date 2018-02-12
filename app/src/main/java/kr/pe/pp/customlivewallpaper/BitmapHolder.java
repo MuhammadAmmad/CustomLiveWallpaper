@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 public class BitmapHolder {
     public interface BitmapHolderEventListener {
-        void onLoadComplete();
+        void onLoadComplete(boolean isInit);
     }
     private BitmapHolderEventListener bitmapHolderEventListener = null;
     public void setBitmapHolderEventListener(BitmapHolderEventListener listener) {
@@ -23,9 +23,7 @@ public class BitmapHolder {
 
     private Context context = null;
     private BitmapHolderMixMode mixMode = null;
-    private BitmapWrapper current = null;
-    private BitmapWrapper next = null;
-    private BitmapWrapper afternext = null;
+    private BitmapWrapper[] wrappers = new BitmapWrapper[3];
     private ArrayList<SaveImage> pathList = new ArrayList<>();
     private int imageMargin = 0;
     private Util.Size screenSize = null;
@@ -48,10 +46,18 @@ public class BitmapHolder {
 
     }
 
-    public void init(Context context) {
-        this.context = context;
-        screenSize = Util.getScreenSize(context);
+    private BitmapWrapper LoadImageFromIndex(int index) {
+        Bitmap bitmap = Util.createBitmapFromPath(pathList.get(index).getPath(), screenSize.getWidth(), screenSize.getHeight(), pathList.get(index).getRotate());
+        if(bitmap == null) {
+            return null;
+        }
+        Bitmap bmp = Util.resizeBitmapWithMargin(bitmap, screenSize.getWidth(), screenSize.getHeight(), Util.ResizeMode.RESIZE_FIT_IMAGE, imageMargin, Util.CropMode.CROP_CENTER);
+        BitmapWrapper wrapper = new BitmapWrapper(self.context, bmp);
+        bitmap.recycle();
+        return wrapper;
+    }
 
+    private void LoadImagesFromData(final boolean isInit) {
         pathList.clear();
         for(SaveImage path : ApplicationData.getImagePathList()) { pathList.add(path); }
 
@@ -63,91 +69,104 @@ public class BitmapHolder {
         (new Thread(new Runnable() {
             @Override
             public void run() {
-                // load current image
-                if(pathList.size() > 0) {
-                    Bitmap bitmap = Util.createBitmapFromPath(pathList.get(currentIndex).getPath(), screenSize.getWidth(), screenSize.getHeight(), pathList.get(currentIndex).getRotate());
-                    Bitmap bmp = Util.resizeBitmapWithMargin(bitmap, screenSize.getWidth(), screenSize.getHeight(), Util.ResizeMode.RESIZE_FIT_IMAGE, imageMargin, Util.CropMode.CROP_CENTER);
-                    current = new BitmapWrapper(self.context, bmp);
-                    bitmap.recycle();
+                int wrapperIndex = 0;
+                while(wrapperIndex < 3 && currentIndex < pathList.size()) {
+                    BitmapWrapper wrapper = LoadImageFromIndex(currentIndex);
+                    if(wrapper != null) {
+                        wrappers[wrapperIndex] = wrapper;
+                        wrapperIndex++;
+                    }
+                    currentIndex++;
                 }
 
-                // load next image
-                if(pathList.size() > 1) {
-                    currentIndex++;
-                    Bitmap bitmap = Util.createBitmapFromPath(pathList.get(currentIndex).getPath(), screenSize.getWidth(), screenSize.getHeight(), pathList.get(currentIndex).getRotate());
-                    Bitmap bmp = Util.resizeBitmapWithMargin(bitmap, screenSize.getWidth(), screenSize.getHeight(), Util.ResizeMode.RESIZE_FIT_IMAGE, imageMargin, Util.CropMode.CROP_CENTER);
-                    next = new BitmapWrapper(self.context, bmp);
-                    bitmap.recycle();
-                }
-
-                // load afternext image
-                if(pathList.size() > 2) {
-                    currentIndex++;
-                    Bitmap bitmap = Util.createBitmapFromPath(pathList.get(currentIndex).getPath(), screenSize.getWidth(), screenSize.getHeight(), pathList.get(currentIndex).getRotate());
-                    Bitmap bmp = Util.resizeBitmapWithMargin(bitmap, screenSize.getWidth(), screenSize.getHeight(), Util.ResizeMode.RESIZE_FIT_IMAGE, imageMargin, Util.CropMode.CROP_CENTER);
-                    afternext = new BitmapWrapper(self.context, bmp);
-                    bitmap.recycle();
-                }
                 isLoading = false;
                 if(bitmapHolderEventListener != null) {
-                    bitmapHolderEventListener.onLoadComplete();
+                    bitmapHolderEventListener.onLoadComplete(isInit);
                 }
             }
         })).start();
     }
 
+    public void init(Context context) {
+        this.context = context;
+        screenSize = Util.getScreenSize(context);
+
+        LoadImagesFromData(true);
+    }
+
+    public void active(boolean isChangeSettings) {
+        if(isChangeSettings) {
+            for(int i=0; i<wrappers.length; i++) {
+                if(wrappers[i] != null) {
+                    wrappers[i].getBitmap().recycle();
+                    wrappers[i] = null;
+                }
+            }
+
+            LoadImagesFromData(false);
+        }
+    }
+
+    public void deactive() {
+
+    }
+
     public void destroy() {
-        if(afternext != null) {
-            afternext.getBitmap().recycle();
-            afternext = null;
-        }
-        if(next != null) {
-            next.getBitmap().recycle();
-            next = null;
-        }
-        if(current != null) {
-            current.getBitmap().recycle();
-            current = null;
+        for(int i=0; i<wrappers.length; i++) {
+            if(wrappers[i] != null) {
+                wrappers[i].getBitmap().recycle();
+                wrappers[i] = null;
+            }
         }
     }
 
     public BitmapWrapper getCurrentBitmap() {
-        return current;
+        return wrappers[0];
     }
 
     public BitmapWrapper getNextBitmap() {
-        return next;
+        return wrappers[1];
     }
 
-    public void next() {
-        if (pathList.size() == 2) {
-            BitmapWrapper temp = current;
-            current = next;
-            next = temp;
-        } else if (pathList.size() > 2) {
-            BitmapWrapper temp = current;
-            current = next;
-            next = afternext;
-            afternext = null;
+    public boolean next() {
+        if(isLoading) return false;
 
-            currentIndex++;
-            if (pathList.size() <= currentIndex) {
-                currentIndex = 0;
-            }
+        if (wrappers[0] != null && wrappers[1] != null && wrappers[2] == null) {
+            BitmapWrapper temp = wrappers[0];
+            wrappers[0] = wrappers[1];
+            wrappers[1] = temp;
+        } else if (wrappers[0] != null && wrappers[1] != null && wrappers[2] != null) {
+            BitmapWrapper temp = wrappers[0];
+            wrappers[0] = wrappers[1];
+            wrappers[1] = wrappers[2];
+            wrappers[2] = null;
 
             isLoading = true;
             (new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    Bitmap bmp = Util.createBitmapFromPath(pathList.get(currentIndex).getPath(), screenSize.getWidth(), screenSize.getHeight(), pathList.get(currentIndex).getRotate());
-                    bmp = Util.resizeBitmapWithMargin(bmp, screenSize.getWidth(), screenSize.getHeight(), Util.ResizeMode.RESIZE_FIT_IMAGE, imageMargin, Util.CropMode.CROP_CENTER);
-                    self.afternext = new BitmapWrapper(self.context, bmp);
+                    int loopCount = 0;
+                    BitmapWrapper wrapper = null;
+                    while(wrapper == null) {
+                        if(loopCount > pathList.size() * 2) break;
+
+                        if (pathList.size() <= currentIndex) {
+                            currentIndex = 0;
+                        }
+
+                        wrapper = LoadImageFromIndex(currentIndex);
+                        currentIndex++;
+                        loopCount++;
+                    }
+                    wrappers[2] = wrapper;
+
                     self.isLoading = false;
                 }
             })).start();
 
             temp.getBitmap().recycle();
         }
+        return true;
     }
 
     public boolean isLoadComplete() {

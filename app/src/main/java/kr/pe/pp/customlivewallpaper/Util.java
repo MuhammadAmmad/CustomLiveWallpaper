@@ -10,6 +10,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.Display;
@@ -64,6 +65,9 @@ public class Util {
         public Size(int width, int height) {
             this.width = width;
             this.height = height;
+        }
+        public Rect toRect() {
+            return new Rect(0, 0, width, height);
         }
 
         public int getWidth() {
@@ -127,6 +131,8 @@ public class Util {
 
         options.inJustDecodeBounds = false;
         Bitmap bmp = BitmapFactory.decodeFile(filePath, options);
+        if(bmp == null) return null;
+
         Log.d("__Debug__", "CreateBitmapFromPath : Result Size(" + bmp.getWidth() + ", " + bmp.getHeight() + ")");
         if(isRotate) {
             Matrix matrix = new Matrix();

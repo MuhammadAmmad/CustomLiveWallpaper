@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.net.sip.SipSession;
 import android.util.Log;
 
@@ -47,6 +48,31 @@ public class Particle {
     private int bitmapHeight = 0;
     private int bitmapHalfWidth = 0;
     private int bitmapHalfHeight = 0;
+
+    public float getX() {
+        return particleX;
+    }
+    public float getY() {
+        return particleY;
+    }
+    public float getWidth() {
+        return bitmapParticle.getWidth() * particleScale;
+    }
+    public float getHeight() {
+        return bitmapParticle.getHeight() * particleScale;
+    }
+    public float getRight() {
+        return particleX + bitmapParticle.getWidth() * particleScale;
+    }
+    public float getBottom() {
+        return particleY + bitmapParticle.getHeight() * particleScale;
+    }
+    public Rect getRect() {
+        return new Rect((int)particleX,
+                (int)particleY,
+                (int)(particleX + bitmapParticle.getWidth() * particleScale),
+                (int)(particleY + bitmapParticle.getHeight() * particleScale));
+    }
 
     public void setParticleEventListener(ParticleEventListener listener) {
         particleEventListener = listener;

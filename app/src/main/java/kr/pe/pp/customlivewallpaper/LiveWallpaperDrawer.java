@@ -14,6 +14,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.widget.Switch;
 
 import java.util.ArrayList;
@@ -126,6 +127,9 @@ public class LiveWallpaperDrawer implements IDrawer {
         //canvas.drawText("Pitch:" + angleSensor.pitch + ", Roll:" + angleSensor.roll + ", OffsetX:" + offsetX + ", OffsetY:" + offsetY, 10, 10, paint);
     }
 
+    public void onTouchEvent(MotionEvent event) {
+        particleDrawer.onTouchEvent(event);
+    }
 
 }
 
