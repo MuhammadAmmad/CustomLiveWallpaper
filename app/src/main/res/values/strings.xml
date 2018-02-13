@@ -17,12 +17,16 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
     <string name="low_battery_mode_text">
-        <b>저전력모드</b>\n
-        <i>저전력모드 입니다.</i>
+        <b>저전력모드</b>\n\n
+        배경화면이 보이는 순간 사진 전환이 이루어져\n
+        배경화면이 장시간 보이더라도\n
+        CPU 자원을 소모하지 않습니다.
     </string>
     <string name="performance_mode_text">
-        <b>고사양모드</b>\n
-        <i>고사양모드 입니다.</i>
+        <b>고사양모드</b>\n\n
+        초단위 이미지 전환이 가능하며\n
+        눈/비눗방울/꽃 등의 입자가 떨어지는 효과를\n
+        적용할 수 있습니다.
     </string>
     <string name="message_clear_wallpaper">지정된 배경화면을 해제 하였습니다.</string>
     <string name="message_apply_wallpaper">배경화면이 적용되었습니다.</string>
@@ -30,4 +34,5 @@
     <string name="message_must_appr_permit">권한을 허용해주셔야 앱을 이용할 수 있습니다.</string>
     <string name="message_exit">종료</string>
     <string name="set_permission">권한 설정</string>
+    <string name="title_select_mode">배경화면 모드 선택</string>
 </resources>

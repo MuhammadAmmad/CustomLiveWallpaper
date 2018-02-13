@@ -17,7 +17,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".HomeActivity">
+        <activity android:name=".MainActivity"
+            android:label="@string/title_select_mode"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -38,10 +40,10 @@
                 android:resource="@xml/livewallpaperservice" />
         </service>
 
-        <activity android:name=".ImageListActivity" />
         <activity
-            android:name=".MainActivity"
-            android:label="@string/title_activity_home"></activity>
+            android:name=".HomeActivity"
+            android:label="@string/title_activity_home"
+            android:screenOrientation="portrait"></activity>
     </application>
 
 </manifest>

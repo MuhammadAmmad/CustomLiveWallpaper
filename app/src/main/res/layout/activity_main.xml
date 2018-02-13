@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#efefef"
     tools:context="kr.pe.pp.customlivewallpaper.MainActivity">
 
     <LinearLayout
@@ -19,12 +20,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <Button
+        <TextView
             android:id="@+id/btnLowBatteryMode"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/main_button_background"
+            android:background="@drawable/shadow_button_normal"
+            android:textColor="#003c71"
+            android:drawableTop="@drawable/eco"
+            android:paddingTop="30dp"
+            android:gravity="center"
             android:text="@string/low_battery_mode_text" />
 
         <View
@@ -32,12 +37,16 @@
             android:layout_height="8dp"
             android:background="#00ffffff"></View>
 
-        <Button
+        <TextView
             android:id="@+id/btnPerformanceMode"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/main_button_background"
+            android:background="@drawable/shadow_button_normal"
+            android:textColor="#71000b"
+            android:drawableTop="@drawable/speedometer"
+            android:paddingTop="30dp"
+            android:gravity="center"
             android:text="@string/performance_mode_text" />
 
     </LinearLayout>

@@ -29,8 +29,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class HomeActivity extends AppCompatActivity implements ImageManageFragment.ImageManageFragmentListener, EffectFragment.OnFragmentInteractionListener {
-    HomeActivity _HomeActivity = null;
-
     private ImageManageFragment imageManageFragment;
     private EffectFragment effectFragment;
 
@@ -39,70 +37,9 @@ public class HomeActivity extends AppCompatActivity implements ImageManageFragme
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        _HomeActivity = this;
-
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            checkPermissions();
-        } else {
-            startApplication();
-        }
-
+        startApplication();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    private void checkPermissions() {
-        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                || checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-        {
-            // Should we show an explanation?
-            if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE))
-            {
-                // ...
-            }
-            requestPermissions(new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE }, 1);
-        }
-        else
-        {
-            startApplication();
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
-    {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == 1)
-        {
-            if (grantResults.length > 0)
-            {
-                for (int i=0; i<grantResults.length; ++i)
-                {
-                    if (grantResults[i] == PackageManager.PERMISSION_DENIED)
-                    {
-                        // 하나라도 거부한다면.
-                        new AlertDialog.Builder(this).setTitle(R.string.message_alert).setMessage(R.string.message_must_appr_permit)
-                                .setPositiveButton(R.string.message_exit, new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                        _HomeActivity.finish();
-                                    }
-                                }).setNegativeButton(R.string.set_permission, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                                        .setData(Uri.parse("package:" + getApplicationContext().getPackageName()));
-                                getApplicationContext().startActivity(intent);
-                            }
-                        }).setCancelable(false).show();
-
-                        return;
-                    }
-                }
-                startApplication();
-            }
-        }
-    }
 
     private void showPreview() {
         Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
