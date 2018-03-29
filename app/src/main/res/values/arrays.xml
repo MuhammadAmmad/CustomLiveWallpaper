@@ -27,6 +27,15 @@
         <item>SplitOut</item>
     </string-array>
 
+    <string-array name="slide_time_name">
+        <item>잠금해제시</item>
+        <item>유지시간동안 유지후 전환</item>
+    </string-array>
+    <string-array name="slide_time_value">
+        <item>Unlock</item>
+        <item>SettingDelay</item>
+    </string-array>
+
     <string-array name="effect_name">
         <item>별</item>
         <item>눈</item>

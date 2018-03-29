@@ -14,6 +14,19 @@ import java.util.TreeMap;
  */
 
 public class ApplicationData {
+    public enum WallpaperMode {
+        ECHO(0),
+        PERFORMANCE(1);
+
+        private final int value;
+        private WallpaperMode(int value) {
+            this.value = value;
+        }
+        public int getValue() {
+            return value;
+        }
+    }
+
     public enum MoveDirection {
         LEFT_DOWN(0),
         DOWN(1),
@@ -30,8 +43,10 @@ public class ApplicationData {
 
     private static ArrayList<SaveImage> _ImagePathList = new ArrayList<>();
 
+    private static WallpaperMode mode = WallpaperMode.ECHO;
     private static boolean isEnableSlide = true;
     private static String slideType = "";
+    private static String slideTime = "";
     private static int slideSpeed = 5;
     private static int slideDelay = 5;
 
@@ -87,10 +102,14 @@ public class ApplicationData {
         editor.commit();
     }
 
+    public static WallpaperMode getMode() { return mode; }
+    public static void setMode(WallpaperMode v) { mode = v; }
     public static boolean getIsEnableSlide() { return isEnableSlide; }
     public static void setIsEnableSlide(boolean v) { isEnableSlide = v; }
     public static String getSlideType() { return slideType; }
     public static void setSlideType(String v) { slideType = v; }
+    public static String getSlideTime() { return slideTime; }
+    public static void setSlideTime(String v) { slideTime = v; }
     public static int getSlideSpeed() { return slideSpeed; }
     public static void setSlideSpeed(int v) { slideSpeed = v; }
     public static int getSlideDelay() { return slideDelay; }
@@ -122,8 +141,10 @@ public class ApplicationData {
     public static void LoadEffects(Context context) {
         SharedPreferences pref = context.getSharedPreferences("Effects", context.MODE_PRIVATE);
 
+        mode = WallpaperMode.values()[pref.getInt("mode", WallpaperMode.ECHO.getValue())];
         isEnableSlide = pref.getBoolean("isEnableSlide", true);
-        slideType = pref.getString("slideType", "SplitOut");;
+        slideType = pref.getString("slideType", "SplitOut");
+        slideTime = pref.getString("slideTime", "Unlock");
         slideSpeed = pref.getInt("slideSpeed", 4);
         slideDelay = pref.getInt("slideDelay", 5);
 
@@ -145,8 +166,10 @@ public class ApplicationData {
         SharedPreferences.Editor editor = pref.edit();
         editor.clear();
 
+        editor.putInt("mode", mode.getValue());
         editor.putBoolean("isEnableSlide", isEnableSlide);
-        editor.putString("slideType", slideType);;
+        editor.putString("slideType", slideType);
+        editor.putString("slideTime", slideTime);
         editor.putInt("slideSpeed", slideSpeed);
         editor.putInt("slideDelay", slideDelay);
 

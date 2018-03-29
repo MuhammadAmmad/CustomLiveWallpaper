@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="kr.pe.pp.customlivewallpaper.EffectFragment">
+    tools:context="kr.pe.pp.customlivewallpaper.EchoEffectFragment">
 
     <!-- TODO: Update blank fragment layout -->
 
@@ -17,8 +17,9 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- 전환효과 -->
+                <!-- 전환효과사용여부 -->
                 <LinearLayout
+                    android:id="@+id/layoutUseSlide"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
@@ -27,8 +28,37 @@
                     android:layout_marginRight="8dp">
 
                     <TextView
-                        android:id="@+id/textViewImage1"
+                        android:id="@+id/textView1"
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="8dp"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp"
+                        android:layout_weight="1"
+                        android:text="전환효과사용" />
+
+                    <Switch
+                        android:id="@+id/switchUseSlide"
                         android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+
+                </LinearLayout>
+
+                <!-- 전환효과 -->
+                <LinearLayout
+                    android:id="@+id/layoutSlideType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@drawable/bottom_border"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp">
+
+                    <TextView
+                        android:id="@+id/textView2"
+                        android:layout_width="60dp"
                         android:layout_height="wrap_content"
                         android:paddingLeft="8dp"
                         android:paddingTop="16dp"
@@ -42,6 +72,97 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:entries="@array/slide_name" />
+
+                </LinearLayout>
+
+                <!-- 전환시기 -->
+                <LinearLayout
+                    android:id="@+id/layoutSlideTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@drawable/bottom_border"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp">
+
+                    <TextView
+                        android:id="@+id/textView3"
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="8dp"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp"
+                        android:layout_weight="1"
+                        android:text="전환시기" />
+
+                    <Spinner
+                        android:id="@+id/spinnerSlideTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:entries="@array/slide_time_name" />
+
+                </LinearLayout>
+
+                <!-- 전환속도 -->
+                <LinearLayout
+                    android:id="@+id/layoutSlideSpeed"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@drawable/bottom_border"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp">
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="8dp"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp"
+                        android:layout_weight="1"
+                        android:text="전환속도" />
+
+
+                    <SeekBar
+                        android:id="@+id/seekBarSlideSpeed"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp"
+                        android:layout_weight="1" />
+
+                </LinearLayout>
+
+                <!-- 전환유지시간 -->
+                <LinearLayout
+                    android:id="@+id/layoutSlideDelay"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@drawable/bottom_border"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp">
+
+                    <TextView
+                        android:id="@+id/textView5"
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="8dp"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp"
+                        android:layout_weight="1"
+                        android:text="유지시간" />
+
+
+                    <SeekBar
+                        android:id="@+id/seekBarSlideDelay"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp"
+                        android:layout_weight="1" />
 
                 </LinearLayout>
 

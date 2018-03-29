@@ -119,7 +119,8 @@ public class MainActivity extends AppCompatActivity {
         btnLowBatteryMode.setOnClickListener(new TextView.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "지원되지 않는 기능입니다.", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(MainActivity.this, EchoActivity.class);
+                startActivity(intent);
             }
         });
         btnLowBatteryMode.setOnTouchListener(new TextView.OnTouchListener() {

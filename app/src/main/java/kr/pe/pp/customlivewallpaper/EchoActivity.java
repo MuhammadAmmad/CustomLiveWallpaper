@@ -1,41 +1,29 @@
 package kr.pe.pp.customlivewallpaper;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.app.Fragment;
+import android.app.Application;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.content.ComponentName;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
-import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class HomeActivity extends AppCompatActivity implements ImageManageFragment.ImageManageFragmentListener, EffectFragment.OnFragmentInteractionListener {
+public class EchoActivity extends AppCompatActivity implements ImageManageFragment.ImageManageFragmentListener, EchoEffectFragment.OnFragmentInteractionListener {
     private ImageManageFragment imageManageFragment;
-    private EffectFragment effectFragment;
+    private EchoEffectFragment echoEffectFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.activity_echo);
 
         ApplicationData.Load(this.getApplicationContext());
         ApplicationData.setMode(ApplicationData.WallpaperMode.ECHO);
@@ -43,7 +31,6 @@ public class HomeActivity extends AppCompatActivity implements ImageManageFragme
 
         startApplication();
     }
-
 
     private void showPreview() {
         Intent intent = new Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
@@ -54,7 +41,7 @@ public class HomeActivity extends AppCompatActivity implements ImageManageFragme
 
     private void startApplication() {
         imageManageFragment = new ImageManageFragment();
-        effectFragment = new EffectFragment();
+        echoEffectFragment = new EchoEffectFragment();
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, imageManageFragment).commit();
 
         TextView textImageManage = (TextView)findViewById(R.id.text_image_manage);
@@ -69,7 +56,7 @@ public class HomeActivity extends AppCompatActivity implements ImageManageFragme
         textEffect.setOnClickListener(new TextView.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, effectFragment).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, echoEffectFragment).commit();
             }
         });
 
